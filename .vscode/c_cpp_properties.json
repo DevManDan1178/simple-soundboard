@@ -4,6 +4,14 @@
     {
       "name": "Soundboard",
       "compileCommands": "${workspaceFolder}/build/compile_commands.json"
-    }
+    },
+    {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceFolder}/src",
+                "${workspaceFolder}/external",
+                "${workspaceFolder}/**"
+            ]
+        }
   ]
 }

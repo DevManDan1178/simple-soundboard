@@ -37,6 +37,9 @@ add_executable(Soundboard
     # Event
     src/event/event_dispatcher.cpp
     src/event/event.cpp
+    # Audio
+    src/audio/audio_manager.cpp
+    src/audio/audio.cpp
 )
 
 
@@ -47,8 +50,9 @@ target_link_libraries(Soundboard PRIVATE
     imgui::imgui
     nfd
 )
-target_include_directories(Soundboard PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 target_include_directories(Soundboard PRIVATE
-    external/nativefiledialog-extended/src/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/external/nativefiledialog-extended/src/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/external/miniaudio
 )
