@@ -1,0 +1,20 @@
+#pragma once
+#include <vector>
+#include <string>
+#include "audio/audio.hpp"
+#include "audio/audio_manager.hpp"
+#include "soundboard/audio_table.hpp"
+
+class Soundboard {
+public:
+    AudioTable audioTable;
+    AudioManager audioManager;
+
+    /**
+     * @brief plays the sound in the sound tables
+     * @param tableIndex index of the table [from 0]
+     * @param index index in the table [from 0]
+     * @return if it was successful or not
+     */
+    bool PlaySound(int tableIndex, int index);
+};
