@@ -17,8 +17,7 @@ endif()
 # ---- Find packages installed by vcpkg ----
 find_package(SDL2 CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
-find_package(imgui CONFIG REQUIRED)
-
+find_package(OpenGL REQUIRED)
 
 # ---- External subdirectories ----
 add_subdirectory(external/nativefiledialog-extended)
@@ -39,20 +38,40 @@ add_executable(Soundboard
     src/event/event.cpp
     # Audio
     src/audio/audio_manager.cpp
-    src/audio/audio.cpp
+    # Soundboard
+    src/soundboard/soundboard.cpp
+    src/soundboard/audio_table.cpp
+    #config
+    src/config/config_manager.cpp
+
+    # DearImGUI
+    external/imgui/imgui.cpp
+    external/imgui/imgui_draw.cpp
+    external/imgui/imgui_tables.cpp
+    external/imgui/imgui_widgets.cpp
+    external/imgui/imgui_demo.cpp
+
+    external/imgui/backends/imgui_impl_opengl3.cpp
+    external/imgui/backends/imgui_impl_sdl2.cpp
+    #external/imgui/backends/imgui_impl_sdlrenderer2.cpp
 )
 
+target_compile_definitions(Soundboard PRIVATE SDL_MAIN_HANDLED)
 
 # ---- Link libraries ----
 target_link_libraries(Soundboard PRIVATE
     SDL2::SDL2
     nlohmann_json::nlohmann_json
-    imgui::imgui
     nfd
+    OpenGL::GL
 )
 
 target_include_directories(Soundboard PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/external/imgui
+    ${CMAKE_CURRENT_SOURCE_DIR}/external/imgui/backends
+
     ${CMAKE_CURRENT_SOURCE_DIR}/external/nativefiledialog-extended/src/include
     ${CMAKE_CURRENT_SOURCE_DIR}/external/miniaudio
 )
