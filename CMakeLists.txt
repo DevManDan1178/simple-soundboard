@@ -29,7 +29,7 @@ add_executable(Soundboard
     src/core/app.cpp
     # UI
     src/ui/file_dialog.cpp
-    src/ui/wheel_overlay_UI.cpp
+    src/ui/wheel_UI.cpp
     src/ui/configuration_UI.cpp
     # Input
     src/input/input_manager.cpp

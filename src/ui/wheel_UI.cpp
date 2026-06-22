@@ -2,7 +2,7 @@
 #include <vector>
 #include <string>
 #include <cmath>
-#include "ui/wheel_overlay_UI.hpp"
+#include "ui/wheel_UI.hpp"
 
 constexpr float HALF = 0.5f;
 constexpr float PI = 3.14159265358979f;
@@ -16,41 +16,23 @@ constexpr float OUTER_WHEEL_BORDER_THICKNESS = 2.0f;
 constexpr int CIRCLE_SEGMENTS = 64;
 constexpr int ARC_SEGMENTS_PER_SLICE = 12;
 
-
 constexpr float EMOTE_WHEEL_INNER_RADIUS_RATIO = 0.25f;
 constexpr float EMOTE_WHEEL_OUTER_RADIUS_RATIO = 1.0f * 1.25f; //1.25f adjusts it to be the size of the outer circle
-
 constexpr float EMOTE_WHEEL_GAP = 0.01f;
-
-
 constexpr float CENTER_BUTTON_RADIUS = 45.0f;
 
-
-constexpr ImU32 OUTER_WHEEL_FILL_COLOR =
-    IM_COL32(20, 20, 20, 220);
-
-constexpr ImU32 OUTER_WHEEL_BORDER_COLOR =
-    IM_COL32(100, 100, 100, 200);
-
-
-constexpr ImU32 EMOTE_SELECTED_COLOR =
-    IM_COL32(80, 160, 255, 255);
-
-constexpr ImU32 EMOTE_DEFAULT_COLOR =
-    IM_COL32(50, 50, 50, 240);
-
-
-constexpr ImU32 CENTER_BUTTON_COLOR =
-    IM_COL32(35, 35, 35, 255);
-
-constexpr ImU32 TEXT_COLOR =
-    IM_COL32_WHITE;
+constexpr ImU32 OUTER_WHEEL_FILL_COLOR = IM_COL32(20, 20, 20, 220);
+constexpr ImU32 OUTER_WHEEL_BORDER_COLOR = IM_COL32(100, 100, 100, 200);
+constexpr ImU32 EMOTE_SELECTED_COLOR = IM_COL32(80, 160, 255, 255);
+constexpr ImU32 EMOTE_DEFAULT_COLOR = IM_COL32(50, 50, 50, 240);
+constexpr ImU32 CENTER_BUTTON_COLOR = IM_COL32(35, 35, 35, 255);
+constexpr ImU32 TEXT_COLOR = IM_COL32_WHITE;
 
 
 
 //↓↓ Full credit to [chatgpt.com] for this one ↓↓ 
 
-int WheelOverlayUI::RenderEmoteWheel(
+int WheelUI::RenderSelectionWheel(
     const std::vector<std::string>& emotes,
     bool& open,
     ImVec2 center,
@@ -74,8 +56,8 @@ int WheelOverlayUI::RenderEmoteWheel(
         return -1;
     }
 
-    float innerRadius =radius * EMOTE_WHEEL_INNER_RADIUS_RATIO;
-    float outerRadius =radius * EMOTE_WHEEL_OUTER_RADIUS_RATIO;
+    float innerRadius = radius * EMOTE_WHEEL_INNER_RADIUS_RATIO;
+    float outerRadius = radius * EMOTE_WHEEL_OUTER_RADIUS_RATIO;
     float angleStep = (TAU) / count;
 
     int hovered = -1;
@@ -138,7 +120,7 @@ int WheelOverlayUI::RenderEmoteWheel(
         // Mouse angle
         float mouseAngle = atan2f(dy, dx);
 
-        // Convert to 0 - 2PI
+        // Convert to [0, 2*PI]
         mouseAngle = mouseAngle < 0 ? mouseAngle + TAU : mouseAngle;
 
 
@@ -148,20 +130,22 @@ int WheelOverlayUI::RenderEmoteWheel(
 
 
         // Normalize slice angles
-        while (normalizedStart < 0) normalizedStart += TAU;
+        while (normalizedStart < 0){
+            normalizedStart += TAU;
+        } 
 
-        while (normalizedEnd < 0)  normalizedEnd += TAU;
+        while (normalizedEnd < 0){
+           normalizedEnd += TAU; 
+        } 
 
         bool insideAngle;
 
         // Normal slice
-        if (normalizedStart <= normalizedEnd)
-        {
+        if (normalizedStart <= normalizedEnd) {
             insideAngle = mouseAngle >= normalizedStart && mouseAngle <= normalizedEnd;
         }
         // Slice crosses 0 degrees
-        else
-        {
+        else {
             insideAngle = mouseAngle >= normalizedStart || mouseAngle <= normalizedEnd;
         }
 
