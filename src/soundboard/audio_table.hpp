@@ -11,14 +11,14 @@ private:
     std::vector<std::vector<Audio>> data;
 
 public:
-    constexpr static const int MAX_SUBTABLE_SIZE = 5;
+    constexpr static const int MAX_SUBTABLE_SIZE = 6;
     
     /**
      * @brief adds an audio to the table index if possible
      * @param tableIndex index of the table [from 0]
      * @return if it was successful or not
      */
-    bool AddAudio(Audio audio, size_t tableIndex);
+    bool AddAudio(Audio& audio, size_t tableIndex);
 
     /**
      * @brief appends an empty subtable to the table
@@ -37,9 +37,9 @@ public:
     /**
      * @brief gets the list of audios at the table index
      * @param tableIndex index of the table [from 0]
-     * @return list of audios at the table index (copy)
+     * @return list of audios at the table index (pointer)
      */
-    std::vector<Audio> GetAudiosAtIdx(size_t tableIndex);
+    std::vector<Audio>* GetAudiosAtIdx(size_t tableIndex);
 
     /**
      * @brief gets the audio at the corresponding position

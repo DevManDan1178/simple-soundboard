@@ -10,7 +10,7 @@ int AudioTable::CreateSubTable() {
     return size();
 }
 
-bool AudioTable::AddAudio(Audio audio, size_t tableIndex) {
+bool AudioTable::AddAudio(Audio& audio, size_t tableIndex) {
     if (tableIndex >= size()) {
         std::cout << "Attempted insert into invalid index of AudioTable (" << tableIndex << ")" << std::endl;
         return false;
@@ -42,17 +42,17 @@ bool AudioTable::RemoveAudio(size_t tableIndex, size_t index) {
 }
 
 
-std::vector<Audio> AudioTable::GetAudiosAtIdx(size_t tableIndex) {
+std::vector<Audio>* AudioTable::GetAudiosAtIdx(size_t tableIndex) {
     if (tableIndex >= size()) {
         std::cout << "Attempted query of invalid index of AudioTable (" << tableIndex << ")" << std::endl;
-        return {};
+        return nullptr;
     }
-    return data[tableIndex];
+    return &data[tableIndex];
 }
 
 
 std::optional<Audio> AudioTable::GetAudio(size_t tableIndex, size_t index) {
-    std::vector<Audio>& subTable = GetAudiosAtIdx(tableIndex);
+    std::vector<Audio>& subTable = *GetAudiosAtIdx(tableIndex);
     std::optional<Audio> audio;
     if (index >= subTable.size()) {
         return audio;
