@@ -37,7 +37,7 @@ bool AudioManager::LoadAudio(const Audio& audio) {
     return true;
 }
 
-void AudioManager::PlayMASound(ma_sound& sound, const float& volume) {
+void AudioManager::PlayMASound(ma_sound& sound, const float volume) {
     ma_sound_set_volume(&sound, volume);
     ma_sound_seek_to_pcm_frame(&sound, 0);
     ma_sound_start(&sound);

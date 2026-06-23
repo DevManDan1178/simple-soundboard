@@ -37,5 +37,5 @@ private:
      * @param sound the loaded sound
      * @param volume the volume to play it at
      */
-    void PlayMASound(ma_sound& sound, const float& volume = 1.0f);
+    void PlayMASound(ma_sound& sound, const float volume = 1.0f);
 };
