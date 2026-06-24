@@ -2,6 +2,7 @@
 #include "SDL.h"
 #include <unordered_map>
 #include "input/hotkeys.hpp"
+#include <string>
 
 namespace Input {
 
@@ -9,13 +10,15 @@ namespace Input {
      * @brief queries for a hotkey input, suspending all other input detection. (Use for changing hotkeys in UI)
      * @return the hotkey obtained
      */
-    Hotkey queryHotkey();
+    Hotkey QueryHotkey();
     
     /**
      * @brief gets the current state of modifier inputs
      * @return Modifiers object of the current state of modifier inputs
      */
-    Modifiers& getModifierState();
+    Modifiers GetModifierState();
+
+    std::string HotkeyToString(const Hotkey& hotkey);
 
     /**
      * @brief parses the SDL scancode into a keycode
@@ -33,5 +36,11 @@ namespace Input {
         {KMOD_SHIFT, Modifiers::Shift},
         {KMOD_CTRL, Modifiers::Ctrl},
         {KMOD_ALT, Modifiers::Alt}
+    };
+
+    inline const std::unordered_map<Modifiers, std::string> MODIFIER_STRINGS = {
+        {Modifiers::Shift, "Shift + "},
+        {Modifiers::Ctrl, "Ctrl + "},
+        {Modifiers::Alt, "Alt + "}
     };
 };

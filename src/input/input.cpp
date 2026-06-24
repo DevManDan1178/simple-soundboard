@@ -1,9 +1,10 @@
 #include "input/input.hpp"
 #include "uiohook.h"
+#include <string>
+#include <sstream>
 
-
-Modifiers& Input::getModifierState() {
-    Modifiers modifiers;
+Modifiers Input::GetModifierState() {
+    Modifiers modifiers = Modifiers::None;
     SDL_Keymod sdlModifiers = SDL_GetModState();
     
     for (const auto& [sdlKeymod, modifierValue] : HOTKEY_MODIFIERS) {
@@ -14,7 +15,7 @@ Modifiers& Input::getModifierState() {
     return modifiers;
 }
 
-Hotkey Input::queryHotkey() {
+Hotkey Input::QueryHotkey() {
     SDL_Event event;
     while (true) {
         while (SDL_PollEvent(&event)) {
@@ -26,15 +27,20 @@ Hotkey Input::queryHotkey() {
                 }
                 
                 //Modifiers
+                bool isModifier = false;
                 for (SDL_Scancode modifierCode : Hotkey::SDL_MODIFIER_CODES) {
                     if (modifierCode == scanCode) {
-                        continue;
+                        isModifier = true;
+                        break;
                     }
+                }
+                if (isModifier) {
+                    continue;
                 }
 
                 int keyCode = ParseSDLScancode(scanCode);
                 
-                Modifiers& modifiers = getModifierState();                
+                Modifiers modifiers = GetModifierState();                
                 return {keyCode, BindType::Keyboard, modifiers};
             }
 
@@ -43,7 +49,7 @@ Hotkey Input::queryHotkey() {
                     continue;
                 }
 
-                Modifiers& modifiers = getModifierState();  
+                Modifiers modifiers = GetModifierState();  
                 return {(int) event.button.button, BindType::Mouse, modifiers};
             }
 
@@ -130,4 +136,116 @@ int Input::ParseSDLScancode(const SDL_Scancode& scanCode) {
         default:
             return VC_UNDEFINED;
     }
+}
+
+
+
+std::string Input::HotkeyToString(const Hotkey& hotkey)
+{
+    std::stringstream ss;
+
+    // Modifiers
+    for (const auto& [modifierValue, modifierStr] : MODIFIER_STRINGS) {
+        if ((hotkey.modifiers & modifierValue) != Modifiers::None) {
+            ss << modifierStr;
+        }
+    }
+
+    if (hotkey.bindType == BindType::Keyboard) {
+        switch (hotkey.keyCode) {
+            case VC_A: ss << "A"; break;
+            case VC_B: ss << "B"; break;
+            case VC_C: ss << "C"; break;
+            case VC_D: ss << "D"; break;
+            case VC_E: ss << "E"; break;
+            case VC_F: ss << "F"; break;
+            case VC_G: ss << "G"; break;
+            case VC_H: ss << "H"; break;
+            case VC_I: ss << "I"; break;
+            case VC_J: ss << "J"; break;
+            case VC_K: ss << "K"; break;
+            case VC_L: ss << "L"; break;
+            case VC_M: ss << "M"; break;
+            case VC_N: ss << "N"; break;
+            case VC_O: ss << "O"; break;
+            case VC_P: ss << "P"; break;
+            case VC_Q: ss << "Q"; break;
+            case VC_R: ss << "R"; break;
+            case VC_S: ss << "S"; break;
+            case VC_T: ss << "T"; break;
+            case VC_U: ss << "U"; break;
+            case VC_V: ss << "V"; break;
+            case VC_W: ss << "W"; break;
+            case VC_X: ss << "X"; break;
+            case VC_Y: ss << "Y"; break;
+            case VC_Z: ss << "Z"; break;
+
+            case VC_0: ss << "0"; break;
+            case VC_1: ss << "1"; break;
+            case VC_2: ss << "2"; break;
+            case VC_3: ss << "3"; break;
+            case VC_4: ss << "4"; break;
+            case VC_5: ss << "5"; break;
+            case VC_6: ss << "6"; break;
+            case VC_7: ss << "7"; break;
+            case VC_8: ss << "8"; break;
+            case VC_9: ss << "9"; break;
+
+            case VC_TAB:        ss << "Tab"; break;
+            case VC_ENTER:      ss << "Enter"; break;
+            case VC_ESCAPE:     ss << "Escape"; break;
+            case VC_SPACE:      ss << "Space"; break;
+            case VC_BACKSPACE:   ss << "Backspace"; break;
+
+            case VC_F1: ss << "F1"; break;
+            case VC_F2: ss << "F2"; break;
+            case VC_F3: ss << "F3"; break;
+            case VC_F4: ss << "F4"; break;
+            case VC_F5: ss << "F5"; break;
+            case VC_F6: ss << "F6"; break;
+            case VC_F7: ss << "F7"; break;
+            case VC_F8: ss << "F8"; break;
+            case VC_F9: ss << "F9"; break;
+            case VC_F10: ss << "F10"; break;
+            case VC_F11: ss << "F11"; break;
+            case VC_F12: ss << "F12"; break;
+
+            case VC_INSERT:     ss << "Insert"; break;
+            case VC_DELETE:     ss << "Delete"; break;
+            case VC_HOME:       ss << "Home"; break;
+            case VC_END:        ss << "End"; break;
+            case VC_PAGE_UP:    ss << "PageUp"; break;
+            case VC_PAGE_DOWN:  ss << "PageDown"; break;
+
+            case VC_UP:    ss << "Up"; break;
+            case VC_DOWN:  ss << "Down"; break;
+            case VC_LEFT:  ss << "Left"; break;
+            case VC_RIGHT: ss << "Right"; break;
+
+            case VC_SEMICOLON:     ss << ";"; break;
+            case VC_QUOTE:         ss << "'"; break;
+            case VC_BACK_SLASH:    ss << "\\"; break;
+            case VC_OPEN_BRACKET:  ss << "["; break;
+            case VC_CLOSE_BRACKET: ss << "]"; break;
+            case VC_COMMA:         ss << ","; break;
+            case VC_PERIOD:        ss << "."; break;
+            case VC_SLASH:         ss << "/"; break;
+            case VC_BACKQUOTE:     ss << "`"; break;
+            default:
+                ss << "Key" << hotkey.keyCode;
+                break;
+        }
+    } else if (hotkey.bindType == BindType::Mouse) {
+        switch (hotkey.keyCode)
+        {
+            case 1: ss << "Mouse Left"; break;
+            case 2: ss << "Mouse Middle"; break;
+            case 3: ss << "Mouse Right"; break;
+            default: ss << "Mouse " << hotkey.keyCode; break;
+        }
+    } else {
+        ss << "undefined";
+    }
+
+    return ss.str();
 }
