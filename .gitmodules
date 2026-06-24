@@ -10,3 +10,6 @@
 [submodule "external/json"]
 	path = external/json
 	url = https://github.com/nlohmann/json.git
+[submodule "external/libuiohook"]
+	path = external/libuiohook
+	url = https://github.com/kwhat/libuiohook.git

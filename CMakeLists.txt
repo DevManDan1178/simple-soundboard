@@ -21,6 +21,7 @@ find_package(OpenGL REQUIRED)
 # ---- External subdirectories ----
 add_subdirectory(external/nativefiledialog-extended)
 add_subdirectory(external/json)
+add_subdirectory(external/libuiohook)
 # ---- Your executable ----
 add_executable(Soundboard
     # Core
@@ -32,6 +33,8 @@ add_executable(Soundboard
     src/ui/configuration_UI.cpp
     # Input
     src/input/input_manager.cpp
+    src/input/hotkey_manager.cpp
+    src/input/hotkey_translator.cpp
     # Event
     src/event/event_dispatcher.cpp
     src/event/event.cpp
@@ -63,6 +66,7 @@ target_link_libraries(Soundboard PRIVATE
     nlohmann_json::nlohmann_json
     nfd
     OpenGL::GL
+    uiohook
 )
 
 target_include_directories(Soundboard PRIVATE
