@@ -3,17 +3,12 @@
 #include <unordered_map>
 
 class HotkeyManager {
-public:
-
-    /**
-     * @brief queries for a hotkey input, suspending all other input detection. (Use for changing hotkeys in UI)
-     * @return the hotkey obtained
-     */
-    Hotkey queryHotkey();
+public:   
+    Hotkey openWheelHotkey;
     
     /**
-     * @brief gets the current state of modifier inputs
-     * @return Modifiers object of the current state of modifier inputs
+     * @brief Sets the hotkey to open the wheel
+     * @return if it was successfully set or not
      */
-    Modifiers& getModifierState();
+    bool SetOpenWheelHotkey(Hotkey hotkey);
 };  
