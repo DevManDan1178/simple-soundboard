@@ -7,7 +7,8 @@
 
 constexpr float INDENT = 20.0f;
 constexpr float VOLUME_SLIDER_WIDTH = 200.0f;
-constexpr float WHEEL_DISPLAY_PADDING_TOP = 15.0f;
+constexpr float MASTER_VOLUME_SLIDER_WIDTH = 400.0f;
+constexpr float WHEEL_DISPLAY_PADDING_TOP = 5.0f;
 constexpr float AUDIO_DISPLAY_PADDING_X = 20.0f;
 constexpr float ADD_AUDIO_PADDING_TOP = 10.0f; //Only if there are audio displays above
 constexpr float ADD_WHEEL_PADDING_TOP = 15.0f; //Only if there are wheel displays above
@@ -18,7 +19,13 @@ void AUDIO_DISPLAY_PADDING() {
 
 void ConfigurationUI::RenderAudioConfigurations(Soundboard& soundboard) {
     AudioTable& audioTable = soundboard.audioTable;
+    AudioManager& audioManager = soundboard.audioManager;
     ImGui::Indent(INDENT);
+
+    float* masterVolume = &audioManager.masterVolume;
+
+    ImGui::SetNextItemWidth(MASTER_VOLUME_SLIDER_WIDTH);
+    ImGui::SliderFloat("##MasterVolume", masterVolume, 0, 2, "Master Volume: %.2f");
 
     const size_t wheelsCount = audioTable.size();
     for (size_t tableIdx = 0; tableIdx < wheelsCount; tableIdx++) {  
@@ -62,7 +69,7 @@ void ConfigurationUI::RenderAudioConfigurations(Soundboard& soundboard) {
                     Audio newAudio = Audio(queryPath);
                     bool success = audioTable.AddAudio(newAudio, tableIdx);
                     if (success) {
-                        soundboard.PlayAudio(tableIdx, audios.size());
+                        soundboard.PlayAudio(tableIdx, audios.size() - 1);
                     }
                 }
             }
@@ -76,7 +83,7 @@ void ConfigurationUI::RenderAudioConfigurations(Soundboard& soundboard) {
     ImGui::Dummy(ImVec2(0, wheelsCount > 0 ? ADD_WHEEL_PADDING_TOP : WHEEL_DISPLAY_PADDING_TOP));
     
     if (ImGui::Button("Add a Wheel")) {
-        audioTable.CreateSubTable();
+        int newWheelIdx = audioTable.CreateSubTable();
     }
 
     ImGui::Unindent(INDENT);
