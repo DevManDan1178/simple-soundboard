@@ -4,14 +4,13 @@
 #include "audio/audio.hpp"
 #include "audio/audio_manager.hpp"
 #include "soundboard/audio_table.hpp"
+#include "input/hotkey_manager.hpp"
 
 class Soundboard {
 public:
     AudioTable audioTable;
     AudioManager audioManager;
-    /**
-     * Add keybinds
-     */
+    HotkeyManager hotkeyManager;
 
     /**
      * @brief plays the sound in the sound tables
