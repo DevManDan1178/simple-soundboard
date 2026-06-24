@@ -3,24 +3,22 @@
 #include "input/hotkey_translator.hpp"
 #include "input/hotkeys.hpp"
 
+Modifiers& HotkeyManager::getModifierState() {
+    Modifiers modifiers;
+    SDL_Keymod sdlModifiers = SDL_GetModState();
+    
+    for (const auto& [sdlKeymod, modifierValue] : HotkeyTranslator::HOTKEY_MODIFIERS) {
+        if (sdlModifiers & sdlKeymod) {
+            modifiers |= modifierValue;
+        }
+    }
+    return modifiers;   
+}
+
 Hotkey HotkeyManager::queryHotkey() {
     SDL_Event event;
-
-    auto getModifiers = []() -> Modifiers& {
-        Modifiers modifiers;
-        SDL_Keymod sdlModifiers = SDL_GetModState();
-        
-        for (const auto& [sdlKeymod, modifierValue] : HotkeyTranslator::HOTKEY_MODIFIERS) {
-            if (sdlModifiers & sdlKeymod) {
-                modifiers |= modifierValue;
-            }
-        }
-        return modifiers;    
-    };
-
     while (true) {
         while (SDL_PollEvent(&event)) {
-            
             if (event.type == SDL_KEYDOWN) {
                 SDL_Scancode scanCode = event.key.keysym.scancode;
                 
@@ -37,7 +35,7 @@ Hotkey HotkeyManager::queryHotkey() {
 
                 int keyCode = HotkeyTranslator::ParseSDLScancode(scanCode);
                 
-                Modifiers& modifiers = getModifiers();                
+                Modifiers& modifiers = getModifierState();                
                 return {keyCode, BindType::Keyboard, modifiers};
             }
 
@@ -46,7 +44,7 @@ Hotkey HotkeyManager::queryHotkey() {
                     continue;
                 }
 
-                Modifiers& modifiers = getModifiers();  
+                Modifiers& modifiers = getModifierState();  
                 return {(int) event.button.button, BindType::Mouse, modifiers};
             }
 
