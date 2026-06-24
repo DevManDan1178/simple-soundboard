@@ -9,6 +9,7 @@ using FilePath = std::string;
 class AudioManager {
 public:
     ma_engine engine;
+    float masterVolume = 1.0f;
 
     AudioManager();
     ~AudioManager();

@@ -54,6 +54,6 @@ bool AudioManager::PlayAudio(const Audio& audio) {
     }
     ma_sound& loadedAudio = AudioManager::loadedAudios[audioFilePath];
     std::cout << "Playing audio: " << audio.name << std::endl;
-    PlayMASound(loadedAudio, audio.volume); 
+    PlayMASound(loadedAudio, audio.volume * masterVolume); 
     return true;
 }
