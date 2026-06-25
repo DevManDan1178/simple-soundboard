@@ -1,8 +1,11 @@
 #pragma once
 #include "SDL.h"
+#include <functional>
 
-enum class BindType {
-    Keyboard, Mouse, None
+enum class BindType : uint8_t{
+    None = 0,
+    Keyboard = 1, 
+    Mouse = 2, 
 };
 
 enum class Modifiers : unsigned int {
@@ -25,6 +28,8 @@ constexpr Modifiers operator&(Modifiers l, Modifiers r) {
     return static_cast<Modifiers>(static_cast<unsigned int>(l) & static_cast<unsigned int>(r));
 }
 
+
+
 struct Hotkey {
     int keyCode;
     BindType bindType;
@@ -39,5 +44,17 @@ struct Hotkey {
         SDL_SCANCODE_LSHIFT, SDL_SCANCODE_RSHIFT,
         SDL_SCANCODE_LCTRL, SDL_SCANCODE_RCTRL,
         SDL_SCANCODE_LALT, SDL_SCANCODE_RALT
+    };
+    bool operator==(const Hotkey&) const = default;
+};
+
+namespace std {
+template<>
+    struct std::hash<Hotkey> {
+        size_t operator()(const Hotkey& h) const {
+            return h.keyCode ^
+                (static_cast<unsigned int>(h.modifiers) << 8) ^
+                (static_cast<uint8_t>(h.bindType) << 9);
+        }
     };
 };
