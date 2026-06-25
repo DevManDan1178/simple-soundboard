@@ -8,7 +8,6 @@
 
 constexpr float INDENT = 10.0f;
 
-
 constexpr float VOLUME_SLIDER_WIDTH = 200.0f;
 constexpr float MASTER_VOLUME_SLIDER_WIDTH = 300.0f;
 constexpr float WHEEL_DISPLAY_PADDING_TOP = 5.0f;
@@ -32,7 +31,7 @@ void AUDIO_DISPLAY_PADDING() {
 
 void ConfigurationUI::RenderHotkeyConfigurations(Soundboard& soundboard) {
     HotkeyManager& hotkeyManager = soundboard.hotkeyManager;
-    Hotkey& openWheelHotkey = hotkeyManager.openWheelHotkey;
+    Hotkey openWheelHotkey = hotkeyManager.openWheelHotkey;
     
     ImGui::Text(HOTKEY_CONFIGURATIONS_TITLE); 
     ImGui::Dummy(ImVec2(0, SECTION_TITLE_PADDING_BOTTOM));
@@ -52,7 +51,7 @@ void ConfigurationUI::RenderHotkeyConfigurations(Soundboard& soundboard) {
     ImGui::Indent(INDENT);
     
     if (hotkeyButton(std::format("{0}##OpenWheel", Input::HotkeyToString(openWheelHotkey)).c_str())) {
-        openWheelHotkey = Input::QueryHotkey();
+        hotkeyManager.SetOpenWheelHotkey(Input::QueryHotkey());
     }
     ImGui::Unindent(INDENT);
 
