@@ -12,9 +12,8 @@ constexpr float HALF_PI = PI * HALF;
 constexpr float OUTER_WHEEL_PADDING = 40.0f;
 constexpr float OUTER_WHEEL_BORDER_THICKNESS = 2.0f;
 
-
 constexpr int CIRCLE_SEGMENTS = 64;
-constexpr int ARC_SEGMENTS_PER_SLICE = 12;
+constexpr int ARC_SEGMENTS_PER_SLICE = 32;
 
 constexpr float EMOTE_WHEEL_INNER_RADIUS_RATIO = 0.25f;
 constexpr float EMOTE_WHEEL_OUTER_RADIUS_RATIO = 1.0f * 1.25f; //1.25f adjusts it to be the size of the outer circle
@@ -29,30 +28,25 @@ constexpr ImU32 CENTER_BUTTON_COLOR = IM_COL32(35, 35, 35, 255);
 constexpr ImU32 TEXT_COLOR = IM_COL32_WHITE;
 
 
-
 //↓↓ Full credit to [chatgpt.com] for this one ↓↓ 
 
 int WheelUI::RenderSelectionWheel(
-    const std::vector<std::string>& emotes,
-    bool& open,
+    const std::vector<std::string>& elements,
+    bool& openParameter,
     ImVec2 center,
     float radius
 ){
-    static int selected = -1;
-
-    if (!open){
-        selected = -1;
+    int hovered = -1;
+    if (!openParameter) {
         return -1;
     }
 
 
     ImGuiIO& io = ImGui::GetIO();
     ImDrawList* draw = ImGui::GetForegroundDrawList();
-    size_t count = emotes.size();
+    size_t count = elements.size();
 
-    if (count == 0)
-    {
-        selected = -1;
+    if (count == 0) {
         return -1;
     }
 
@@ -60,7 +54,7 @@ int WheelUI::RenderSelectionWheel(
     float outerRadius = radius * EMOTE_WHEEL_OUTER_RADIUS_RATIO;
     float angleStep = (TAU) / count;
 
-    int hovered = -1;
+    
 
     // Background circle
     draw->AddCircleFilled(
@@ -81,16 +75,14 @@ int WheelUI::RenderSelectionWheel(
 
 
 
-    for (int i = 0; i < count; i++)
-    {
+    for (int i = 0; i < count; i++) {
         float startAngle = i * angleStep - HALF_PI + EMOTE_WHEEL_GAP;
         float endAngle = (i + 1) * angleStep - HALF_PI - EMOTE_WHEEL_GAP;
         
         std::vector<ImVec2> points;
 
         // Outer arc
-        for (int j = 0; j <= ARC_SEGMENTS_PER_SLICE; j++)
-        {
+        for (int j = 0; j <= ARC_SEGMENTS_PER_SLICE; j++) {
             float t = j / (float)ARC_SEGMENTS_PER_SLICE;
             float angle = startAngle + (endAngle - startAngle) * t;
             points.push_back(ImVec2(center.x + cosf(angle) * outerRadius, center.y + sinf(angle) * outerRadius));
@@ -99,8 +91,7 @@ int WheelUI::RenderSelectionWheel(
 
 
         // Inner arc
-        for (int j = ARC_SEGMENTS_PER_SLICE; j >= 0; j--)
-        {
+        for (int j = ARC_SEGMENTS_PER_SLICE; j >= 0; j--) {
             float t = j / (float) ARC_SEGMENTS_PER_SLICE;
 
             float angle = startAngle + (endAngle - startAngle) * t;
@@ -130,11 +121,11 @@ int WheelUI::RenderSelectionWheel(
 
 
         // Normalize slice angles
-        while (normalizedStart < 0){
+        while (normalizedStart < 0) {
             normalizedStart += TAU;
         } 
 
-        while (normalizedEnd < 0){
+        while (normalizedEnd < 0) {
            normalizedEnd += TAU; 
         } 
 
@@ -166,12 +157,12 @@ int WheelUI::RenderSelectionWheel(
         float textRadius = (innerRadius + outerRadius) * HALF;
 
         ImVec2 textPos(center.x + cosf(textAngle) * textRadius, center.y + sinf(textAngle) * textRadius);
-        ImVec2 textSize = ImGui::CalcTextSize(emotes[i].c_str());
+        ImVec2 textSize = ImGui::CalcTextSize(elements[i].c_str());
 
         draw->AddText(
             ImVec2(textPos.x - textSize.x * HALF, textPos.y - textSize.y * HALF ), 
             TEXT_COLOR, 
-            emotes[i].c_str()
+            elements[i].c_str()
         );
     }
 
@@ -183,22 +174,19 @@ int WheelUI::RenderSelectionWheel(
         CIRCLE_SEGMENTS
     );
 
-    if (hovered != -1)
-    {
-        ImVec2 size = ImGui::CalcTextSize(emotes[hovered].c_str());
+    if (hovered != -1) {
+        ImVec2 size = ImGui::CalcTextSize(elements[hovered].c_str());
 
         draw->AddText(
             ImVec2(center.x - size.x * HALF, center.y - size.y * HALF),
             TEXT_COLOR,
-            emotes[hovered].c_str()
+            elements[hovered].c_str()
         );
     }
 
     if (hovered != -1 && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-        selected = hovered;
-        open = false;
+        openParameter = false;
     }
 
-
-    return selected;
+    return hovered;
 }
