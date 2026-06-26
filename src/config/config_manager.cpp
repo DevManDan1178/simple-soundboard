@@ -88,7 +88,7 @@ void ConfigManager::UpdateSoundboardFromJSON() {
         file >> jsonData;
 
         audioManager.masterVolume = jsonData[MASTER_VOLUME_KEY].get<float>();
-        hotkeyManager.openWheelHotkey = JSONToHotkey(jsonData[OPEN_WHEEL_KEYBIND_KEY]);
+        hotkeyManager.SetOpenWheelHotkey(JSONToHotkey(jsonData[OPEN_WHEEL_KEYBIND_KEY]));
 
         audioTable.Clear();
         for (int tableIdx = 0; tableIdx < jsonData[AUDIO_TABLE_KEY].size(); tableIdx++) {
