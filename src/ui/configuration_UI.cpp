@@ -2,6 +2,7 @@
 #include "ui/configuration_UI.hpp"
 #include "ui/file_dialog.hpp"
 #include "input/input.hpp"
+#include "event/event_dispatcher.hpp"
 #include <format>
 #include <string>
 #include <filesystem>
@@ -62,6 +63,7 @@ void ConfigurationUI::RenderHotkeyConfigurations(Soundboard& soundboard) {
 }
 
 void ConfigurationUI::RenderAudioConfigurations(Soundboard& soundboard) {
+    static bool unsavedChanges = false;
     AudioTable& audioTable = soundboard.audioTable;
     AudioManager& audioManager = soundboard.audioManager;
 
@@ -72,7 +74,9 @@ void ConfigurationUI::RenderAudioConfigurations(Soundboard& soundboard) {
     float* masterVolume = &audioManager.masterVolume;
 
     ImGui::SetNextItemWidth(MASTER_VOLUME_SLIDER_WIDTH);
-    ImGui::SliderFloat("##MasterVolume", masterVolume, 0, 2, "Master Volume: %.2f");
+    if (ImGui::SliderFloat("##MasterVolume", masterVolume, 0, 2, "Master Volume: %.2f")) {
+        unsavedChanges = true;
+    }
     ImGui::SameLine();
     ImGui::Text("[Ctrl + Click] for Manual Input");
 
@@ -96,12 +100,15 @@ void ConfigurationUI::RenderAudioConfigurations(Soundboard& soundboard) {
             AUDIO_DISPLAY_PADDING();
 
             ImGui::SetNextItemWidth(VOLUME_SLIDER_WIDTH);
-            ImGui::SliderFloat(std::format("##{0}-{1}", tableIdx, i).c_str(), &audio.volume, 0, 2, "Volume: %.2f");
+            if (ImGui::SliderFloat(std::format("##{0}-{1}", tableIdx, i).c_str(), &audio.volume, 0, 2, "Volume: %.2f")) {
+                unsavedChanges = true;
+            }
             
             AUDIO_DISPLAY_PADDING();
 
             if (ImGui::Button(std::format("Remove Audio##{0}-{1}", tableIdx, i).c_str())) {
                 audioTable.RemoveAudio(tableIdx, i);
+                unsavedChanges = true;
             }
         }
 
@@ -120,6 +127,7 @@ void ConfigurationUI::RenderAudioConfigurations(Soundboard& soundboard) {
                     if (success) {
                         soundboard.PlayAudio(tableIdx, audios.size() - 1);
                     }
+                    unsavedChanges = true;
                 }
             }
         } else {
@@ -133,6 +141,14 @@ void ConfigurationUI::RenderAudioConfigurations(Soundboard& soundboard) {
     
     if (ImGui::Button("Add a Wheel")) {
         int newWheelIdx = audioTable.CreateSubTable();
+        unsavedChanges = true;
+    }
+
+    ImGui::Dummy(ImVec2(0, wheelsCount > 0 ? ADD_WHEEL_PADDING_TOP : WHEEL_DISPLAY_PADDING_TOP));
+    
+    if (ImGui::Button(unsavedChanges ? "[!] Save" : "Saved")) {
+        EventDispatcher::Emit(ConfigChangeEvent());
+        unsavedChanges = false;
     }
 
     ImGui::Unindent(INDENT);
