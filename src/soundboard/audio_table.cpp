@@ -10,6 +10,10 @@ int AudioTable::CreateSubTable() {
     return size();
 }
 
+void AudioTable::Clear() {
+    data.clear();
+}
+
 bool AudioTable::AddAudio(Audio& audio, size_t tableIndex) {
     if (tableIndex >= size()) {
         std::cout << "Attempted insert into invalid index of AudioTable (" << tableIndex << ")" << std::endl;

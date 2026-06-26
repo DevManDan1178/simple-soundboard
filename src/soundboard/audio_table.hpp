@@ -12,6 +12,10 @@ private:
 
 public:
     constexpr static const int MAX_SUBTABLE_SIZE = 6;
+    /**
+     * Clears all data
+     */
+    void Clear();
     
     /**
      * @brief adds an audio to the table index if possible
