@@ -7,6 +7,7 @@ class HotkeyManager {
 public:  
     Hotkey openWheelHotkey;
     
+    HotkeyManager();
     /**
      * @brief Sets the hotkey to open the wheel
      * @return if it was successfully set or not
