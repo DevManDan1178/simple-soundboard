@@ -27,11 +27,21 @@ constexpr ImU32 EMOTE_DEFAULT_COLOR = IM_COL32(50, 50, 50, 240);
 constexpr ImU32 CENTER_BUTTON_COLOR = IM_COL32(35, 35, 35, 255);
 constexpr ImU32 TEXT_COLOR = IM_COL32_WHITE;
 
+constexpr unsigned int ELEMENT_NAME_MAX_LENGTH = 10;
+
+std::string shortenString(const std::string& str, int preEllipsisLength) {
+    if (str.length() <= preEllipsisLength) {
+        return str;
+    }
+
+    return str.substr(0, preEllipsisLength) + "...";
+}
 
 //↓↓ Full credit to [chatgpt.com] for this one ↓↓ 
 
 int WheelUI::RenderSelectionWheel(
     const std::vector<std::string>& elements,
+    const int& wheelIndex,
     bool& openParameter,
     ImVec2 center,
     float radius
@@ -155,14 +165,14 @@ int WheelUI::RenderSelectionWheel(
         // Text
         float textAngle = (startAngle + endAngle) * HALF;
         float textRadius = (innerRadius + outerRadius) * HALF;
-
+        std::string text = shortenString(elements[i], ELEMENT_NAME_MAX_LENGTH);
         ImVec2 textPos(center.x + cosf(textAngle) * textRadius, center.y + sinf(textAngle) * textRadius);
-        ImVec2 textSize = ImGui::CalcTextSize(elements[i].c_str());
+        ImVec2 textSize = ImGui::CalcTextSize(text.c_str());
 
         draw->AddText(
             ImVec2(textPos.x - textSize.x * HALF, textPos.y - textSize.y * HALF ), 
             TEXT_COLOR, 
-            elements[i].c_str()
+            text.c_str()
         );
     }
 
@@ -174,15 +184,14 @@ int WheelUI::RenderSelectionWheel(
         CIRCLE_SEGMENTS
     );
 
-    if (hovered != -1) {
-        ImVec2 size = ImGui::CalcTextSize(elements[hovered].c_str());
 
-        draw->AddText(
-            ImVec2(center.x - size.x * HALF, center.y - size.y * HALF),
-            TEXT_COLOR,
-            elements[hovered].c_str()
-        );
-    }
+    ImVec2 size = ImGui::CalcTextSize(std::to_string(wheelIndex).c_str());
+
+    draw->AddText(
+        ImVec2(center.x - size.x * HALF, center.y - size.y * HALF),
+        TEXT_COLOR,
+        std::to_string(wheelIndex).c_str()
+    );
 
     if (hovered != -1 && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
         openParameter = false;
