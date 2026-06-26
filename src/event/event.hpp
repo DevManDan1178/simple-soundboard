@@ -4,13 +4,22 @@
 enum class EventType {
     None,
     ToggleWheel, 
+    WheelScroll,
     WheelSelected, 
     ToggleUI, 
+    ConfigChange,
 };
 
 struct Event {
     virtual EventType getType() const = 0;
     virtual ~Event() = default;
+};
+
+struct ConfigChangeEvent : Event {
+    EventType getType() const override {
+        return EventType::ConfigChange;
+    }
+    ConfigChangeEvent() = default;
 };
 
 struct WheelSelectedEvent : Event {
@@ -28,6 +37,14 @@ struct ToggleWheelEvent : Event {
     }
     bool visible;
     ToggleWheelEvent(bool visible): visible(visible) {};
+};
+
+struct WheelScrollEvent : Event {
+    EventType getType() const override {
+        return EventType::WheelScroll;
+    }
+    bool scrollDirection; // (True, False) => (Up, Down)
+    WheelScrollEvent(bool scrollDirection) : scrollDirection(scrollDirection) {};
 };
 
 struct ToggleUIEvent : Event {
