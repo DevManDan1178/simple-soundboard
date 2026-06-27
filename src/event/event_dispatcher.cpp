@@ -4,7 +4,6 @@
 std::unordered_map<int, EventListener> listeners;
 
 int EventDispatcher::Subscribe(const EventListener& listener) {
-    std::cout << "subsc" << std::endl;
     int listenerId = listeners.size();
     listeners[listenerId] = listener;
     return listenerId;
