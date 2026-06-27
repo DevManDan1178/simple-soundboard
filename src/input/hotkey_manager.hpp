@@ -6,6 +6,7 @@
 class HotkeyManager {
 public:  
     Hotkey openWheelHotkey;
+    Hotkey stopAllAudioHotkey;
     
     HotkeyManager();
     /**
@@ -14,4 +15,10 @@ public:
      */
     bool SetOpenWheelHotkey(Hotkey hotkey);
 
+
+    /**
+     * @brief Sets the hotkey to stop all audio
+     * @return if it was successfully set or not
+     */
+    bool SetStopAllAudioHotkey(Hotkey hotkey);
 };  
