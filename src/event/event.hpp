@@ -8,11 +8,19 @@ enum class EventType {
     WheelSelected, 
     ToggleUI, 
     ConfigChange,
+    StopAllSounds,
 };
 
 struct Event {
     virtual EventType getType() const = 0;
     virtual ~Event() = default;
+};
+
+struct StopAllSoundsEvent : Event {
+    EventType getType() const override {
+        return EventType::StopAllSounds;
+    }
+    StopAllSoundsEvent() = default;
 };
 
 struct ConfigChangeEvent : Event {
