@@ -16,48 +16,77 @@ class AudioManager {
 public:
     
     float masterVolume = 1.0f;
+    float speakerVolumeModifier = 1.0f;
+
+    // Owned copies of device infos — safe after context is destroyed
+    std::vector<ma_device_info> playbackDevices;
+    // For UI
+    int selectedDriverIdx = -1;
 
     AudioManager();
     ~AudioManager();
     
     /**
-     * @brief loads the audio
+     * Stops all audios
+     */
+    void StopAllAudio();
+
+    /**
+     * @brief Loads the audio into both systemEngine and deviceEngine.
      * @param audio the audio to load
-     * @return if it was successful or not
+     * @return true if successful
      */
     bool LoadAudio(const Audio& audio);
 
     /**
-     * @brief plays the audio (and loads it first if it is not loaded)
-     * (if not loaded) Calls LoadAudio with the audio
-     * Calls PlayMALoadedAudio with the loaded sound at the audio's volume
+     * @brief Plays the audio (loads it first if not already cached).
      * @param audio the audio to play
-     * @return if it was successful or not
+     * @param ignoreVirtualDevice if to only play it on the speakers and not on the virtual device
+     * @return true if successful
      */
-    bool PlayAudio(const Audio& audio);
-    
-    std::vector<std::string> GetAvailableDrivers();
+    bool PlayAudio(const Audio& audio, bool ignoreVirtualDevice = false);
 
-    void SetAudioDriver(unsigned int driverIndex);
+    /**
+     * @brief Returns a list of available playback device names.
+     *        Must be called before SetAudioDriver.
+     */
+    std::vector<ma_device_info> GetAvailableDrivers();
+
+    /**
+     * @brief Switches deviceEngine to the given playback device.
+     *        Automatically re-binds all loaded sounds to the new engine.
+     * @param index index into the list returned by GetAvailableDrivers
+     */
+    void SetAudioDriver(unsigned int index);
+
+
+    /**
+     * Gets the name of the current virtual device
+     */
+    std::string GetCurrentAudioDriverName();
 
     FilePath getAudioFilePath(const Audio& audio);
 
 private:
+    std::string audioDriverName;
     ma_engine systemEngine{};
     ma_engine deviceEngine{};
 
-    // Owned copies of device infos — safe to keep after context is destroyed
-    std::vector<ma_device_info> playbackDevices;
-
-    // Points into playbackDevices — valid as long as playbackDevices is not resized
+    // Points into playbackDevices — valid as long as playbackDevices isn't resized
     ma_device_id* selectedDeviceID = nullptr;
 
     std::unordered_map<FilePath, LoadedAudio> loadedAudios;
 
+    void OnAudioDeviceChange();
     /**
-     * @brief plays loaded MiniAudio sound 
-     * @param audio the loaded audio
-     * @param volume the volume to play it at
+     * @brief Uninits and clears all loaded sounds from both engines.
      */
-    void PlayMALoadedAudio(LoadedAudio& audio, const float volume = 1.0f);
+    void UnloadAllAudio();
+
+    /**
+     * @brief Plays a loaded sound pair at the given volume.
+     * @param audio the loaded audio
+     * @param volume playback volume (default 1.0)
+     */
+    void PlayMALoadedAudio(LoadedAudio& audio, const float volume = 1.0f, bool ignoreVirtualDevice = false);
 };

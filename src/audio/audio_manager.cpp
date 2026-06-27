@@ -1,4 +1,5 @@
 #include "audio_manager.hpp"
+#include "event/event_dispatcher.hpp"
 #include "audio.hpp"
 #include <filesystem>
 #include <iostream>
@@ -12,29 +13,42 @@ FilePath AudioManager::getAudioFilePath(const Audio& audio) {
 
 AudioManager::AudioManager()
 {
-    // Engine A (system default)
-    if (ma_engine_init(NULL, &systemEngine) != MA_SUCCESS)
-    {
-        std::cout << "Failed system engine\n";
-    }
+    ma_engine_config engineConfig = ma_engine_config_init();
+    engineConfig.sampleRate = 48000;
 
-    // Engine B (device engine starts same as system initially)
-    if (ma_engine_init(NULL, &deviceEngine) != MA_SUCCESS)
+    if (ma_engine_init(&engineConfig, &systemEngine) != MA_SUCCESS)
+        std::cout << "[AudioManager] ERROR: Failed to init systemEngine\n";
+
+    if (ma_engine_init(&engineConfig, &deviceEngine) != MA_SUCCESS)
+        std::cout << "[AudioManager] ERROR: Failed to init deviceEngine\n";
+}
+
+void AudioManager::StopAllAudio()
+{
+    for (auto& [path, audio] : loadedAudios)
     {
-        std::cout << "Failed device engine\n";
+        ma_sound_stop(&audio.speaker);
+        ma_sound_stop(&audio.virtualDevice);
+        ma_sound_seek_to_pcm_frame(&audio.speaker, 0);
+        ma_sound_seek_to_pcm_frame(&audio.virtualDevice, 0);
     }
 }
 
 AudioManager::~AudioManager()
+{
+    UnloadAllAudio();
+    ma_engine_uninit(&deviceEngine);
+    ma_engine_uninit(&systemEngine);
+}
+
+void AudioManager::UnloadAllAudio()
 {
     for (auto& [path, audio] : loadedAudios)
     {
         ma_sound_uninit(&audio.speaker);
         ma_sound_uninit(&audio.virtualDevice);
     }
-
-    ma_engine_uninit(&deviceEngine);
-    ma_engine_uninit(&systemEngine);
+    loadedAudios.clear();
 }
 
 bool AudioManager::LoadAudio(const Audio& audio)
@@ -43,38 +57,34 @@ bool AudioManager::LoadAudio(const Audio& audio)
 
     LoadedAudio& loaded = loadedAudios[path];
 
-    // System engine sound
     if (ma_sound_init_from_file(
         &systemEngine,
         path.c_str(),
-        0,
-        NULL,
-        NULL,
+        0, NULL, NULL,
         &loaded.speaker) != MA_SUCCESS)
     {
-        std::cout << "System sound load failed\n";
+        std::cout << "[LoadAudio] ERROR: System sound load failed: " << path << "\n";
         return false;
     }
 
-    // Device engine sound
     if (ma_sound_init_from_file(
         &deviceEngine,
         path.c_str(),
-        0,
-        NULL,
-        NULL,
+        0, NULL, NULL,
         &loaded.virtualDevice) != MA_SUCCESS)
     {
-        std::cout << "Device sound load failed\n";
+        std::cout << "[LoadAudio] ERROR: Device sound load failed: " << path << "\n";
         return false;
     }
 
+    ma_sound_set_looping(&loaded.speaker, MA_FALSE);
+    ma_sound_set_looping(&loaded.virtualDevice, MA_FALSE);
     return true;
 }
 
-std::vector<std::string> AudioManager::GetAvailableDrivers()
+std::vector<ma_device_info> AudioManager::GetAvailableDrivers()
 {
-    std::vector<std::string> drivers;
+    std::vector<ma_device_info> drivers;
 
     ma_context_config config = ma_context_config_init();
     ma_context context;
@@ -87,75 +97,99 @@ std::vector<std::string> AudioManager::GetAvailableDrivers()
 
     if (ma_context_init(backends, 3, &config, &context) != MA_SUCCESS)
     {
-        std::cout << "Failed to init context for device enumeration\n";
+        std::cout << "[GetAvailableDrivers] ERROR: Failed to init context\n";
         return drivers;
     }
 
     ma_device_info* pPlaybackInfos = nullptr;
     ma_uint32 count = 0;
 
-    if (ma_context_get_devices(
-            &context,
-            &pPlaybackInfos,
-            &count,
-            NULL,
-            NULL) != MA_SUCCESS)
+    if (ma_context_get_devices(&context, &pPlaybackInfos, &count, NULL, NULL) != MA_SUCCESS)
     {
-        std::cout << "Failed to get devices\n";
+        std::cout << "[GetAvailableDrivers] ERROR: Failed to get devices\n";
         ma_context_uninit(&context);
         return drivers;
     }
 
-    // Copy all device infos into our owned vector before the context is destroyed.
-    // selectedDeviceID will point into this vector, so it stays valid.
     playbackDevices.assign(pPlaybackInfos, pPlaybackInfos + count);
-
-    // Reset selectedDeviceID — old pointer is about to become invalid
     selectedDeviceID = nullptr;
 
-    for (auto& device : playbackDevices)
-        drivers.emplace_back(device.name);
+    ma_context_uninit(&context);
+    return playbackDevices;
+}
 
-    ma_context_uninit(&context); // safe: data is already copied into playbackDevices
-    return drivers;
+std::string AudioManager::GetCurrentAudioDriverName() {
+    return audioDriverName;
 }
 
 void AudioManager::SetAudioDriver(unsigned int index)
 {
     if (index >= playbackDevices.size())
     {
-        std::cout << "Invalid device index\n";
+        std::cout << "[SetAudioDriver] ERROR: Invalid device index\n";
+        return;
+    }
+    if (selectedDeviceID == &playbackDevices[index].id) {
         return;
     }
 
-    // Point into our owned vector — stays valid as long as playbackDevices isn't resized
+    std::cout << "audio driver changed" << std::endl;
     selectedDeviceID = &playbackDevices[index].id;
+    audioDriverName = playbackDevices[index].name;
+    selectedDriverIdx = index;
+    EventDispatcher::Emit(ConfigChangeEvent());
+
+    // Uninit all sounds bound to the old deviceEngine before destroying it
+    for (auto& [path, audio] : loadedAudios)
+        ma_sound_uninit(&audio.virtualDevice);
 
     ma_engine_uninit(&deviceEngine);
 
+    // Reinit deviceEngine with the new device, preserving sample rate
     ma_engine_config config = ma_engine_config_init();
     config.pPlaybackDeviceID = selectedDeviceID;
+    config.sampleRate = 48000;
 
     if (ma_engine_init(&config, &deviceEngine) != MA_SUCCESS)
     {
-        std::cout << "Failed device engine init\n";
+        std::cout << "[SetAudioDriver] ERROR: Failed to init deviceEngine\n";
         selectedDeviceID = nullptr;
         return;
     }
+
+    // Reload all virtualDevice sounds into the new engine
+    for (auto& [path, audio] : loadedAudios)
+    {
+        if (ma_sound_init_from_file(
+            &deviceEngine,
+            path.c_str(),
+            0, NULL, NULL,
+            &audio.virtualDevice) != MA_SUCCESS)
+        {
+            std::cout << "[SetAudioDriver] ERROR: Failed to reload sound: " << path << "\n";
+        }
+        ma_sound_set_looping(&audio.virtualDevice, MA_FALSE);
+    }
+
+    std::cout << "[SetAudioDriver] OK: deviceEngine set to: "
+              << playbackDevices[index].name << "\n";
+
 }
 
-void AudioManager::PlayMALoadedAudio(LoadedAudio& audio, const float volume)
+void AudioManager::PlayMALoadedAudio(LoadedAudio& audio, const float volume, bool ignoreVirtualDevice)
 {
-    ma_sound_set_volume(&audio.speaker, volume);
+    ma_sound_set_volume(&audio.speaker, volume * speakerVolumeModifier);
     ma_sound_seek_to_pcm_frame(&audio.speaker, 0);
     ma_sound_start(&audio.speaker);
-
+    if (ignoreVirtualDevice) {
+        return;
+    }
     ma_sound_set_volume(&audio.virtualDevice, volume);
     ma_sound_seek_to_pcm_frame(&audio.virtualDevice, 0);
     ma_sound_start(&audio.virtualDevice);
 }
 
-bool AudioManager::PlayAudio(const Audio& audio)
+bool AudioManager::PlayAudio(const Audio& audio, bool ignoreVirtualDevice)
 {
     FilePath audioFilePath = getAudioFilePath(audio);
 
@@ -166,6 +200,6 @@ bool AudioManager::PlayAudio(const Audio& audio)
     }
 
     LoadedAudio& loadedAudio = loadedAudios[audioFilePath];
-    PlayMALoadedAudio(loadedAudio, audio.volume * masterVolume);
+    PlayMALoadedAudio(loadedAudio, audio.volume * masterVolume, ignoreVirtualDevice);
     return true;
 }
