@@ -9,6 +9,7 @@ enum class EventType {
     ToggleUI, 
     ConfigChange,
     StopAllSounds,
+    ConfigSaved
 };
 
 struct Event {
@@ -28,6 +29,13 @@ struct ConfigChangeEvent : Event {
         return EventType::ConfigChange;
     }
     ConfigChangeEvent() = default;
+};
+
+struct ConfigSavedEvent : Event {
+    EventType getType() const override {
+        return EventType::ConfigSaved;
+    }
+    ConfigSavedEvent() = default;
 };
 
 struct WheelSelectedEvent : Event {
