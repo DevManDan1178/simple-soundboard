@@ -21,6 +21,121 @@
 
 #include "ui/wheel_UI.hpp"
 
+#include <SDL.h>
+#include <Windows.h>
+
+void SetAlpha(SDL_Window* window, HWND hwnd, float alpha)
+{
+    // clamp alpha to valid range
+    if (alpha < 0.0f) alpha = 0.0f;
+    if (alpha > 1.0f) alpha = 1.0f;
+
+    BYTE winAlpha = static_cast<BYTE>(alpha * 255.0f);
+
+    // Enable layered window if not already
+    LONG style = GetWindowLong(hwnd, GWL_EXSTYLE);
+    SetWindowLong(hwnd, GWL_EXSTYLE, style | WS_EX_LAYERED);
+
+    // Apply alpha
+    SetLayeredWindowAttributes(
+        hwnd,
+        0,
+        winAlpha,
+        LWA_ALPHA
+    );
+}
+void SetBorderless(SDL_Window* window, HWND hwnd, bool borderless)
+{
+    SDL_SetWindowBordered(window, borderless ? SDL_FALSE : SDL_TRUE);
+
+    SetWindowPos(
+        hwnd,
+        nullptr,
+        0, 0, 0, 0,
+        SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED | SWP_NOACTIVATE
+    );
+}
+
+void SetAlwaysOnTop(SDL_Window* window, HWND hwnd, bool alwaysOnTop) {
+    (void)window; // unused, but kept for symmetry
+
+    if (alwaysOnTop) {
+        SetWindowPos(
+            hwnd,
+            HWND_TOPMOST,
+            0, 0, 0, 0,
+            SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE
+        );
+    } else {
+        SetWindowPos(
+            hwnd,
+            HWND_NOTOPMOST,
+            0, 0, 0, 0,
+            SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE
+        );
+    }
+}
+
+
+void App::ToggleWheelVisible(bool visible)
+{
+    wheelVisible = visible;
+    if (visible) {
+        SetAlpha(window, hwnd, 0.6f);
+    }
+    
+    if (visible)
+    {
+        SDL_DisplayMode dm{};
+        SDL_GetCurrentDisplayMode(0, &dm);
+
+        RECT wr{};
+        GetWindowRect(hwnd, &wr);
+        configPositionX = wr.left;
+        configPositionY = wr.top;
+        configWidth     = wr.right  - wr.left;
+        configHeight    = wr.bottom - wr.top;
+
+        SDL_SetWindowBordered(window, SDL_FALSE);
+
+        SetWindowPos(
+            hwnd,
+            HWND_TOPMOST,
+            0, 0, dm.w, dm.h,
+            SWP_FRAMECHANGED | SWP_SHOWWINDOW
+        );
+    }
+    else
+    {
+        // SDL_SetWindowBordered internally calls SetWindowPos with SWP_SHOWWINDOW,
+        // which pulls the window to the foreground — so we explicitly push it back
+        // down immediately after
+        SDL_SetWindowBordered(window, SDL_TRUE);
+
+        SetWindowPos(
+            hwnd,
+            HWND_BOTTOM,          // send to bottom of z-order first
+            configPositionX,
+            configPositionY,
+            configWidth,
+            configHeight,
+            SWP_FRAMECHANGED | SWP_NOACTIVATE
+        );
+
+        // Then make it non-topmost without changing z-order further
+        SetWindowPos(
+            hwnd,
+            HWND_NOTOPMOST,
+            0, 0, 0, 0,
+            SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE
+        );
+    }
+
+    if (!visible) {
+        SetAlpha(window, hwnd, 1.0f);
+    }
+}
+ 
 void App::ShowWheel(std::vector<std::string> elements) {
     ImGuiViewport* viewport = ImGui::GetMainViewport();
 
@@ -29,41 +144,44 @@ void App::ShowWheel(std::vector<std::string> elements) {
         viewport->Pos.y + viewport->Size.y * 0.5f
     );
 
-    wheelSelectedIndex = WheelUI::RenderSelectionWheel(elements, wheelIndex, wheelVisible, screenCenter);
+    wheelSelectedIndex = WheelUI::RenderSelectionWheel(elements, wheelIndex, wheelVisible);
 }
 
 
+void App::UI()
+{
+    int w, h;
+    SDL_GL_GetDrawableSize(window, &w, &h);
 
-void App::UI() {
-    ImGui::SetNextWindowBgAlpha(0.0f);
+    ImGuiWindowFlags flags =
+        ImGuiWindowFlags_NoDecoration |
+        ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoSavedSettings;
+
     ImGui::SetNextWindowPos(ImVec2(0, 0));
-    ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
+    ImGui::SetNextWindowSize(ImVec2(w, h));
 
-    ImGui::Begin(
-        "Soundboard",
-        nullptr,
-        ImGuiWindowFlags_NoTitleBar |
-        ImGuiWindowFlags_NoResize   |
-        ImGuiWindowFlags_NoMove     
-    );
-    
-    if (wheelVisible) {
+    ImGui::Begin(wheelVisible ? "Wheel" : "Soundboard", nullptr, flags);
+
+    if (wheelVisible)
+    {
         std::vector<Audio>* wheelAudios = soundboard.GetAudiosAtIndex(wheelIndex);
-        std::vector<std::string> wheelAudioNames;
-        wheelAudioNames.reserve(wheelAudios->size());
-        for (Audio audio : *wheelAudios) {
-            wheelAudioNames.push_back(audio.name);
-        }
 
-        ShowWheel(wheelAudioNames);
+        std::vector<std::string> names;
+        names.reserve(wheelAudios->size());
+
+        for (const Audio& a : *wheelAudios)
+            names.push_back(a.name);
+
+        ShowWheel(names);
+        ImGui::End();
+        return;
     }
 
     ConfigurationUI::Render(soundboard);
-   
     ImGui::End();
 }
-
-
 
 void App::InitializeUI() {
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0) {
@@ -76,7 +194,7 @@ void App::InitializeUI() {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
-    SDL_Window* window = SDL_CreateWindow(
+    window = SDL_CreateWindow(
         "Soundboard",
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
@@ -87,13 +205,13 @@ void App::InitializeUI() {
     SDL_SysWMinfo wmInfo{};
     SDL_VERSION(&wmInfo.version);
     SDL_GetWindowWMInfo(window, &wmInfo);
-    HWND hwnd = wmInfo.info.win.window;
+    hwnd = wmInfo.info.win.window;
 
     LONG_PTR exStyle = GetWindowLongPtr(hwnd, GWL_EXSTYLE);
     exStyle |= WS_EX_LAYERED;
     SetWindowLongPtr(hwnd, GWL_EXSTYLE, exStyle);
     SetLayeredWindowAttributes(hwnd, 0, 255, LWA_ALPHA);
-    SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+    SetWindowPos(hwnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
 
     int display_w, display_h;
     SDL_GL_GetDrawableSize(window, &display_w, &display_h);
@@ -110,12 +228,9 @@ void App::InitializeUI() {
     ImGui_ImplSDL2_InitForOpenGL(window, gl_context);
     ImGui_ImplOpenGL3_Init("#version 330");
 
-    bool running = true;
+   bool running = true;
     SDL_Event event;
     while (running) {
-        if (!(GetAsyncKeyState(VK_LBUTTON) & 0x8000))
-            SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-
         while (SDL_PollEvent(&event)) {
             ImGui_ImplSDL2_ProcessEvent(&event);
             if (event.type == SDL_QUIT)
@@ -134,11 +249,13 @@ void App::InitializeUI() {
         ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
 
-        
         UI();
 
         ImGui::Render();
+
+        SDL_GL_GetDrawableSize(window, &display_w, &display_h);
         glViewport(0, 0, display_w, display_h);
+
         glClearColor(0.f, 0.f, 0.f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT);
 
@@ -169,7 +286,11 @@ void App::HandleEvent(const Event& event) {
             return;
         }
         const ToggleWheelEvent& toggleWheelEvent = dynamic_cast<const ToggleWheelEvent&>(event);
-        wheelVisible = toggleWheelEvent.visible;
+        if (wheelVisible == toggleWheelEvent.visible) {
+            return;
+        }
+        
+        ToggleWheelVisible(toggleWheelEvent.visible);
         if (!wheelVisible) {
             soundboard.PlayAudio(wheelIndex, wheelSelectedIndex);
         }
@@ -195,22 +316,3 @@ void App::Initialize() {
     return;
 }
 
-/*
-void setClickThrough(HWND hwnd, bool clickThrough) {
-    LONG_PTR exStyle = GetWindowLongPtr(hwnd, GWL_EXSTYLE);
-    if (clickThrough)
-        exStyle |= WS_EX_TRANSPARENT;
-    else
-        exStyle &= ~WS_EX_TRANSPARENT;
-    SetWindowLongPtr(hwnd, GWL_EXSTYLE, exStyle);
-}
-
-void setBorderless(SDL_Window* window, HWND hwnd, bool borderless)
-{
-    SDL_SetWindowBordered(window, borderless ? SDL_FALSE : SDL_TRUE);
-
-    // force Windows to apply the style change
-    SetWindowPos(hwnd, nullptr, 0, 0, 0, 0,
-        SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
-}
-*/

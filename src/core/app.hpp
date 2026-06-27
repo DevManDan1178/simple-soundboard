@@ -3,6 +3,9 @@
 #include "config/config_manager.hpp"
 #include "event/event.hpp"
 
+#include "SDL.h"
+#include <SDL_opengl.h>
+#include <SDL_syswm.h>
 
 class App {
 public:
@@ -21,6 +24,14 @@ public:
 
     
 private:
+    SDL_Window* window;
+    HWND hwnd;
+    int configPositionX;
+    int configPositionY;
+    int configWidth;
+    int configHeight;
+
+    constexpr static const int WHEEL_UI_SIZE = 400;
     /**
      * @brief Initializes the UI loop (keeps running until application end)
      */
@@ -31,14 +42,18 @@ private:
      * @param Event event object
      */
     void HandleEvent(const Event& event);
+    
     /**
      * @brief Shows the wheel UI
      * @param elements elements to show in the wheel
      */
     void ShowWheel(std::vector<std::string> elements);
+    
     /**
      * @brief The UI loop called ever frame
      */
     void UI();
-    bool hiddenUI = false;
+
+    void ToggleWheelVisible(bool visible);
+    
 };
