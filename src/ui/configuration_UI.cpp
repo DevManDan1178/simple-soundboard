@@ -25,13 +25,59 @@ constexpr float SECTION_PADDING = 20.0f;
 
 constexpr const char* HOTKEY_CONFIGURATIONS_TITLE = "------ HOTKEYS ------";
 constexpr const char* AUDIO_CONFIGURATIONS_TITLE  = "--- SOUND EFFECTS ---";
+constexpr const char* DRIVER_CONFIGURATIONS_TITLE = "--- AUDIO DRIVERS ---";
 
 void AUDIO_DISPLAY_PADDING() {
     ImGui::SameLine(0, AUDIO_DISPLAY_PADDING_X);
 }
 
-void ConfigurationUI::RenderHotkeyConfigurations(Soundboard& soundboard) {
-    HotkeyManager& hotkeyManager = soundboard.hotkeyManager;
+
+
+void ConfigurationUI::RenderDriverConfigurations(AudioManager& audioManager) {
+    ImGui::Text(DRIVER_CONFIGURATIONS_TITLE); 
+    ImGui::Dummy(ImVec2(0, SECTION_TITLE_PADDING_BOTTOM));
+    ImGui::Indent(INDENT);
+    static std::vector<std::string> audioDrivers = audioManager.GetAvailableDrivers();
+    static int selectedDriver = 0;
+    if (audioDrivers.empty()) {
+        ImGui::Text("[!] No Audio Drivers Detected");
+        ImGui::SameLine();
+        if (ImGui::Button("Retry")) {
+            audioDrivers = audioManager.GetAvailableDrivers();
+        }
+        return;
+    }
+
+    if (ImGui::BeginCombo("Audio Driver", audioDrivers[selectedDriver].c_str())) {
+        audioDrivers = audioManager.GetAvailableDrivers();
+        if (audioDrivers.empty())
+        {
+            ImGui::TextDisabled("No audio drivers detected");
+            ImGui::EndCombo();
+            return;
+        }
+        
+        for (int i = 0; i < audioDrivers.size(); ++i) {
+            bool isSelected = (selectedDriver == i);
+
+            if (ImGui::Selectable(audioDrivers[i].c_str(), isSelected))
+            {
+                selectedDriver = i;
+
+                // Switch to the selected driver
+                audioManager.SetAudioDriver(i);
+            }
+
+            if (isSelected)
+                ImGui::SetItemDefaultFocus();
+        }
+
+        ImGui::EndCombo();
+    }
+     ImGui::Unindent(INDENT);
+}
+
+void ConfigurationUI::RenderHotkeyConfigurations(HotkeyManager& hotkeyManager) {
     Hotkey openWheelHotkey = hotkeyManager.openWheelHotkey;
     
     ImGui::Text(HOTKEY_CONFIGURATIONS_TITLE); 
@@ -159,7 +205,8 @@ void ConfigurationUI::Render(Soundboard& soundboard) {
 
     RenderAudioConfigurations(soundboard);
     ImGui::Dummy(ImVec2(0, SECTION_PADDING));
-    RenderHotkeyConfigurations(soundboard);
-
+    RenderHotkeyConfigurations(soundboard.hotkeyManager);
+    ImGui::Dummy(ImVec2(0, SECTION_PADDING));
+    RenderDriverConfigurations(soundboard.audioManager);
     ImGui::PopItemFlag();
 }

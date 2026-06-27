@@ -6,5 +6,6 @@ namespace ConfigurationUI {
     void Render(Soundboard& soundboard);
 
     void RenderAudioConfigurations(Soundboard& soundboard);
-    void RenderHotkeyConfigurations(Soundboard& soundboard);
+    void RenderHotkeyConfigurations(HotkeyManager& hotkeyManager);
+    void RenderDriverConfigurations(AudioManager& audioManager);
 }
