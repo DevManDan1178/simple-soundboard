@@ -23,8 +23,9 @@ HotkeyCallbacks pressed_bindings;
  * Hotkey callbacks for released
  */
 HotkeyCallbacks released_bindings;
+
 /**
- * Mapps keycodes to their pressed state (mouse keycodes are negative)
+ * Maps keycodes to their pressed state (mouse keycodes are negative)
  */
 std::unordered_map<int, bool> keystates;
 
@@ -106,7 +107,7 @@ void DispatchUIOHOOKEvent(uiohook_event* event) {
     Hotkey detectedHotkey{
         code, 
         isKeyboard ? BindType::Keyboard : BindType::Mouse, 
-        GetUIOHOOKEventModifiers(event->mask)
+        isPressed ? GetUIOHOOKEventModifiers(event->mask) : Modifiers::None //No modifiers on key release for consistency
     };
     
     HotkeyCallbacks& hotkeyCallbackList = isPressed ? pressed_bindings : released_bindings;
@@ -125,7 +126,8 @@ void InputListener::SetOnHotkeyPress(const Hotkey& hotkey, const Callback& callb
 }
 
 void InputListener::SetOnHotkeyRelease(const Hotkey& hotkey, const Callback& callback) {
-    released_bindings[hotkey] = callback;
+    Hotkey modlessHotkey = Hotkey{hotkey.keyCode, hotkey.bindType, Modifiers::None};
+    released_bindings[modlessHotkey] = callback;
 }
 
 void InputListener::RemoveOnHotkeyPress(const Hotkey& hotkey) {
