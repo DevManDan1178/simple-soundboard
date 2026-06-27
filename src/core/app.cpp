@@ -302,6 +302,8 @@ void App::HandleEvent(const Event& event) {
         const WheelScrollEvent& wheelScrollEvent = dynamic_cast<const WheelScrollEvent&>(event);
         int deltaWheelIndex = wheelScrollEvent.scrollDirection ? 1 : -1;
         wheelIndex = (wheelIndex + deltaWheelIndex + audioTableSize) % audioTableSize;
+    } else if (event.getType() == EventType::StopAllSounds) {
+        soundboard.StopAllAudio();
     }
 };
 
