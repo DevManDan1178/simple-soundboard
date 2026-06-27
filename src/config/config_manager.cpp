@@ -2,6 +2,7 @@
 #include "event/event_dispatcher.hpp"
 #include <nlohmann/json.hpp>
 #include <windows.h>
+#include "miniaudio.h"
 #include <iostream>
 #include <fstream>
 #include <filesystem>
@@ -15,6 +16,8 @@ constexpr const char* NAME_KEY = "name";
 constexpr const char* MASTER_VOLUME_KEY = "masterVolume";
 constexpr const char* AUDIO_TABLE_KEY = "audioTable";
 constexpr const char* OPEN_WHEEL_KEYBIND_KEY = "openWheelKeybind";
+constexpr const char* STOP_ALL_AUDIO_KEYBIND_KEY = "stopAllAudioKeybind";
+constexpr const char* AUDIO_DRIVER_NAME_KEY = "audioDriverName";
 
 static std::filesystem::path getExeDir()
 {
@@ -57,7 +60,11 @@ void ConfigManager::WriteToJSON() const {
         json jsonData;
 
         jsonData[MASTER_VOLUME_KEY] = audioManager.masterVolume;
+        jsonData[AUDIO_DRIVER_NAME_KEY] = audioManager.GetCurrentAudioDriverName();
+        std::cout << "saved audio driver name " << audioManager.GetCurrentAudioDriverName() << std::endl;
+
         jsonData[OPEN_WHEEL_KEYBIND_KEY] = HotkeyToJSON(hotkeyManager.openWheelHotkey);
+        jsonData[STOP_ALL_AUDIO_KEYBIND_KEY] = HotkeyToJSON(hotkeyManager.stopAllAudioHotkey);
 
         for (int tableIdx = 0; tableIdx < audioTable.size(); tableIdx++) {
             std::vector<Audio>& audios = *audioTable.GetAudiosAtIdx(tableIdx);
@@ -89,6 +96,18 @@ void ConfigManager::UpdateSoundboardFromJSON() {
 
         audioManager.masterVolume = jsonData[MASTER_VOLUME_KEY].get<float>();
         hotkeyManager.SetOpenWheelHotkey(JSONToHotkey(jsonData[OPEN_WHEEL_KEYBIND_KEY]));
+        hotkeyManager.SetStopAllAudioHotkey(JSONToHotkey(jsonData[STOP_ALL_AUDIO_KEYBIND_KEY]));
+
+        std::string audioDriverName = jsonData[AUDIO_DRIVER_NAME_KEY].get<std::string>();
+        std::vector<ma_device_info> availableDrivers = audioManager.GetAvailableDrivers();
+
+        for (int i = 0; i < availableDrivers.size(); i++) {
+            if (availableDrivers[i].name == audioDriverName) {
+                audioManager.SetAudioDriver(i);
+                std::cout << availableDrivers[i].name << " - " << audioDriverName << std::endl;
+                break;
+            }
+        }
 
         audioTable.Clear();
         for (int tableIdx = 0; tableIdx < jsonData[AUDIO_TABLE_KEY].size(); tableIdx++) {
