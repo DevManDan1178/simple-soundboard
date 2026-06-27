@@ -14,6 +14,7 @@ constexpr const char* VOLUME_KEY = "volume";
 constexpr const char* NAME_KEY = "name";
 
 constexpr const char* MASTER_VOLUME_KEY = "masterVolume";
+constexpr const char* SPEAKER_VOLUME_KEY = "speakerVolume";
 constexpr const char* AUDIO_TABLE_KEY = "audioTable";
 constexpr const char* OPEN_WHEEL_KEYBIND_KEY = "openWheelKeybind";
 constexpr const char* STOP_ALL_AUDIO_KEYBIND_KEY = "stopAllAudioKeybind";
@@ -60,6 +61,7 @@ void ConfigManager::WriteToJSON() const {
         json jsonData;
 
         jsonData[MASTER_VOLUME_KEY] = audioManager.masterVolume;
+        jsonData[SPEAKER_VOLUME_KEY] = audioManager.speakerVolumeModifier;
         jsonData[AUDIO_DRIVER_NAME_KEY] = audioManager.GetCurrentAudioDriverName();
         std::cout << "saved audio driver name " << audioManager.GetCurrentAudioDriverName() << std::endl;
 
@@ -74,6 +76,7 @@ void ConfigManager::WriteToJSON() const {
         }
 
         file << jsonData.dump(4);
+        EventDispatcher::Emit(ConfigSavedEvent());
     } catch (const std::exception& e) {
         std::cout << "Error writing to JSON: " << e.what() << std::endl;
     }
@@ -95,6 +98,7 @@ void ConfigManager::UpdateSoundboardFromJSON() {
         file >> jsonData;
 
         audioManager.masterVolume = jsonData[MASTER_VOLUME_KEY].get<float>();
+        audioManager.speakerVolumeModifier= jsonData[SPEAKER_VOLUME_KEY].get<float>();
         hotkeyManager.SetOpenWheelHotkey(JSONToHotkey(jsonData[OPEN_WHEEL_KEYBIND_KEY]));
         hotkeyManager.SetStopAllAudioHotkey(JSONToHotkey(jsonData[STOP_ALL_AUDIO_KEYBIND_KEY]));
 
