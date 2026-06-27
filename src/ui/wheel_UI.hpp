@@ -9,8 +9,7 @@ namespace WheelUI {
      * @param elements elements on the wheel
      * @param wheelIndex index of the wheel in the soundboard
      * @param openParameter reference to the boolean that controls if it is open
-     * @param center center position of the wheel
      * @param radius radius of the wheel (default = 120.0f)
      */
-    int RenderSelectionWheel(const std::vector<std::string>& elements, const int& wheelIndex, bool& openParameter, ImVec2 center, float radius = 120.0f); 
+    int RenderSelectionWheel(const std::vector<std::string>& elements, const int& wheelIndex, bool& openParameter, float radius = 240.0f); 
 };

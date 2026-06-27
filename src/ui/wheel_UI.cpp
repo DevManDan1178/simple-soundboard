@@ -1,5 +1,6 @@
 #include "imgui.h"
 #include <vector>
+#include <windows.h>
 #include <string>
 #include <cmath>
 #include "ui/wheel_UI.hpp"
@@ -18,7 +19,7 @@ constexpr int ARC_SEGMENTS_PER_SLICE = 32;
 constexpr float EMOTE_WHEEL_INNER_RADIUS_RATIO = 0.25f;
 constexpr float EMOTE_WHEEL_OUTER_RADIUS_RATIO = 1.0f * 1.25f; //1.25f adjusts it to be the size of the outer circle
 constexpr float EMOTE_WHEEL_GAP = 0.01f;
-constexpr float CENTER_BUTTON_RADIUS = 45.0f;
+constexpr float CENTER_BUTTON_RADIUS = 65.0f;
 
 constexpr ImU32 OUTER_WHEEL_FILL_COLOR = IM_COL32(20, 20, 20, 220);
 constexpr ImU32 OUTER_WHEEL_BORDER_COLOR = IM_COL32(100, 100, 100, 200);
@@ -43,7 +44,6 @@ int WheelUI::RenderSelectionWheel(
     const std::vector<std::string>& elements,
     const int& wheelIndex,
     bool& openParameter,
-    ImVec2 center,
     float radius
 ){
     int hovered = -1;
@@ -53,7 +53,7 @@ int WheelUI::RenderSelectionWheel(
 
 
     ImGuiIO& io = ImGui::GetIO();
-    ImDrawList* draw = ImGui::GetForegroundDrawList();
+    ImDrawList* draw = ImGui::GetWindowDrawList();
     size_t count = elements.size();
 
     if (count == 0) {
@@ -61,12 +61,15 @@ int WheelUI::RenderSelectionWheel(
     }
 
     float innerRadius = radius * EMOTE_WHEEL_INNER_RADIUS_RATIO;
-    float outerRadius = radius * EMOTE_WHEEL_OUTER_RADIUS_RATIO;
+    float outerRadius = radius;
     float angleStep = (TAU) / count;
 
-    
+    ImVec2 center = ImVec2(
+        ImGui::GetIO().DisplaySize.x * 0.5f,
+        ImGui::GetIO().DisplaySize.y * 0.5f
+    );
 
-    // Background circle
+    /* Background circle
     draw->AddCircleFilled(
         center,
         radius + OUTER_WHEEL_PADDING,
@@ -82,8 +85,17 @@ int WheelUI::RenderSelectionWheel(
         CIRCLE_SEGMENTS,
         OUTER_WHEEL_BORDER_THICKNESS
     );
+    */
 
+    // Replace the mouse position block inside the per-slice loop.
+// Move this ABOVE the loop (compute once, not per-slice):
 
+    POINT cursorScreen{};
+    GetCursorPos(&cursorScreen);
+    // Convert screen coords to window-client coords so they match
+    // the ImGui draw origin (which is client-space)
+    ScreenToClient(GetActiveWindow(), /* or cache hwnd */ &cursorScreen);
+    ImVec2 mousePos = ImVec2((float)cursorScreen.x, (float)cursorScreen.y);
 
     for (int i = 0; i < count; i++) {
         float startAngle = i * angleStep - HALF_PI + EMOTE_WHEEL_GAP;
@@ -112,8 +124,9 @@ int WheelUI::RenderSelectionWheel(
 
 
         // Mouse offset from wheel center
-        float dx = io.MousePos.x - center.x;
-        float dy = io.MousePos.y - center.y;
+        
+        float dx = mousePos.x - center.x;
+        float dy = mousePos.y - center.y;
 
         // Distance from center
         float distance = sqrtf(dx * dx + dy * dy);
@@ -193,7 +206,7 @@ int WheelUI::RenderSelectionWheel(
         std::to_string(wheelIndex).c_str()
     );
 
-    if (hovered != -1 && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+    if (hovered != -1 && (GetAsyncKeyState(VK_LBUTTON) & 0x8000)) {
         openParameter = false;
     }
 
