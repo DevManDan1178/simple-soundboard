@@ -30,7 +30,7 @@ private:
     int configPositionY;
     int configWidth;
     int configHeight;
-
+    bool unsavedAudioChanges;
     constexpr static const int WHEEL_UI_SIZE = 400;
     /**
      * @brief Initializes the UI loop (keeps running until application end)

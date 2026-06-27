@@ -1,4 +1,5 @@
 #include "imgui.h"
+#include "miniaudio.h"
 #include "ui/configuration_UI.hpp"
 #include "ui/file_dialog.hpp"
 #include "input/input.hpp"
@@ -37,18 +38,20 @@ void ConfigurationUI::RenderDriverConfigurations(AudioManager& audioManager) {
     ImGui::Text(DRIVER_CONFIGURATIONS_TITLE); 
     ImGui::Dummy(ImVec2(0, SECTION_TITLE_PADDING_BOTTOM));
     ImGui::Indent(INDENT);
-    static std::vector<std::string> audioDrivers = audioManager.GetAvailableDrivers();
-    static int selectedDriver = 0;
+    static std::vector<ma_device_info>& audioDrivers = audioManager.playbackDevices;
+    if (audioDrivers.empty()) {
+        audioManager.GetAvailableDrivers();
+    }
+    static int& selectedDriver = audioManager.selectedDriverIdx;
     if (audioDrivers.empty()) {
         ImGui::Text("[!] No Audio Drivers Detected");
         ImGui::SameLine();
         if (ImGui::Button("Retry")) {
-            audioDrivers = audioManager.GetAvailableDrivers();
+            audioManager.GetAvailableDrivers();
         }
         return;
     }
-
-    if (ImGui::BeginCombo("Audio Driver", audioDrivers[selectedDriver].c_str())) {
+    if (ImGui::BeginCombo("Audio Driver", selectedDriver >= 0 ? audioDrivers[selectedDriver].name : "Select an Audio Driver")) {
         audioDrivers = audioManager.GetAvailableDrivers();
         if (audioDrivers.empty())
         {
@@ -60,7 +63,7 @@ void ConfigurationUI::RenderDriverConfigurations(AudioManager& audioManager) {
         for (int i = 0; i < audioDrivers.size(); ++i) {
             bool isSelected = (selectedDriver == i);
 
-            if (ImGui::Selectable(audioDrivers[i].c_str(), isSelected))
+            if (ImGui::Selectable(audioDrivers[i].name, isSelected))
             {
                 selectedDriver = i;
 
@@ -79,7 +82,7 @@ void ConfigurationUI::RenderDriverConfigurations(AudioManager& audioManager) {
 
 void ConfigurationUI::RenderHotkeyConfigurations(HotkeyManager& hotkeyManager) {
     Hotkey openWheelHotkey = hotkeyManager.openWheelHotkey;
-    
+    Hotkey stopAllSoundsHotkey = hotkeyManager.stopAllAudioHotkey;
     ImGui::Text(HOTKEY_CONFIGURATIONS_TITLE); 
     ImGui::Dummy(ImVec2(0, SECTION_TITLE_PADDING_BOTTOM));
 
@@ -102,14 +105,23 @@ void ConfigurationUI::RenderHotkeyConfigurations(HotkeyManager& hotkeyManager) {
     }
     ImGui::Unindent(INDENT);
 
+    ImGui::Text("Stop All Sounds");
+
+    ImGui::Indent(INDENT);
+    
+    if (hotkeyButton(std::format("{0}##StopAllSounds", Input::HotkeyToString(stopAllSoundsHotkey)).c_str())) {
+        hotkeyManager.SetStopAllAudioHotkey(Input::QueryHotkey());
+    }
+
+    ImGui::Unindent(INDENT);
+
     ImGui::Dummy(ImVec2(0, SECTION_TITLE_PADDING_BOTTOM));
     ImGui::Text("[!] Modifier keys: [Ctrl], [Alt], [Shift]");
     
     ImGui::Unindent(INDENT);
 }
 
-void ConfigurationUI::RenderAudioConfigurations(Soundboard& soundboard) {
-    static bool unsavedChanges = false;
+void ConfigurationUI::RenderAudioConfigurations(Soundboard& soundboard,  bool& unsavedChanges) {
     AudioTable& audioTable = soundboard.audioTable;
     AudioManager& audioManager = soundboard.audioManager;
 
@@ -118,9 +130,17 @@ void ConfigurationUI::RenderAudioConfigurations(Soundboard& soundboard) {
     ImGui::Indent(INDENT);
 
     float* masterVolume = &audioManager.masterVolume;
+    float* speakerVolume = &audioManager.speakerVolumeModifier;
 
     ImGui::SetNextItemWidth(MASTER_VOLUME_SLIDER_WIDTH);
     if (ImGui::SliderFloat("##MasterVolume", masterVolume, 0, 2, "Master Volume: %.2f")) {
+        unsavedChanges = true;
+    }
+    ImGui::SameLine();
+    ImGui::Text("[Ctrl + Click] for Manual Input");
+
+    ImGui::SetNextItemWidth(MASTER_VOLUME_SLIDER_WIDTH);
+    if (ImGui::SliderFloat("##SpeakerVolume", speakerVolume, 0, 2, "Speaker Volume Modifier: %.2f")) {
         unsavedChanges = true;
     }
     ImGui::SameLine();
@@ -140,7 +160,7 @@ void ConfigurationUI::RenderAudioConfigurations(Soundboard& soundboard) {
             Audio& audio = audios[i];
             
             if (ImGui::Button(std::format("{0}##{1}-{2}", audio.name, tableIdx, i).c_str())) {
-                soundboard.PlayAudio(tableIdx, i);
+                soundboard.PlayAudio(tableIdx, i, true);
             }
 
             AUDIO_DISPLAY_PADDING();
@@ -169,10 +189,7 @@ void ConfigurationUI::RenderAudioConfigurations(Soundboard& soundboard) {
                 
                 if (!queryPath.empty()) {
                     Audio newAudio = Audio(queryPath);
-                    bool success = audioTable.AddAudio(newAudio, tableIdx);
-                    if (success) {
-                        soundboard.PlayAudio(tableIdx, audios.size() - 1);
-                    }
+                    audioTable.AddAudio(newAudio, tableIdx);
                     unsavedChanges = true;
                 }
             }
@@ -200,10 +217,10 @@ void ConfigurationUI::RenderAudioConfigurations(Soundboard& soundboard) {
     ImGui::Unindent(INDENT);
 }
 
-void ConfigurationUI::Render(Soundboard& soundboard) {
+void ConfigurationUI::Render(Soundboard& soundboard, bool& unsavedAudioChanges) {
     ImGui::PushItemFlag(ImGuiItemFlags_NoTabStop, true); //Prevents tab from focusing elements
 
-    RenderAudioConfigurations(soundboard);
+    RenderAudioConfigurations(soundboard, unsavedAudioChanges);
     ImGui::Dummy(ImVec2(0, SECTION_PADDING));
     RenderHotkeyConfigurations(soundboard.hotkeyManager);
     ImGui::Dummy(ImVec2(0, SECTION_PADDING));

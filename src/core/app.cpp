@@ -179,7 +179,7 @@ void App::UI()
         return;
     }
 
-    ConfigurationUI::Render(soundboard);
+    ConfigurationUI::Render(soundboard, unsavedAudioChanges);
     ImGui::End();
 }
 
@@ -304,6 +304,8 @@ void App::HandleEvent(const Event& event) {
         wheelIndex = (wheelIndex + deltaWheelIndex + audioTableSize) % audioTableSize;
     } else if (event.getType() == EventType::StopAllSounds) {
         soundboard.StopAllAudio();
+    } else if (event.getType() == EventType::ConfigSaved) {
+        unsavedAudioChanges = false;
     }
 };
 
