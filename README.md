@@ -10,11 +10,15 @@ This is a small soundboard application that lets you play (and stop) audio files
 
 ## Setup
 
-Audios are picked through a file dialog, so you can pick any audio (mp3, wav...) from the file explorer.
+Audio files are binded to wheels, which are then operated like an emote wheel to select and play the audio.
 
-An additional audio driver can be picked for which the soundboard application will replay the audio in.
+- *Maximum of 6 audios per wheel.*
 
-The use of a third party app to mix the input of audio drivers is necessary, like <a href="https://vb-audio.com/Voicemeeter/">VoiceMeeter</a>.
+- *Audios are picked through a file dialog, so you can pick any audio (mp3, wav...) from the file explorer.*
+
+An audio driver can be picked for which the soundboard application will replay the audio in.
+
+*The use of a third party app to mix the input of audio drivers is necessary, like <a href="https://vb-audio.com/Voicemeeter/">VoiceMeeter</a>.*
 
 ### Adjustable Parameters
 - Audio sound effects (individual per audio)
