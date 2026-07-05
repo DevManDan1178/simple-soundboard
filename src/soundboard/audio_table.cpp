@@ -29,6 +29,14 @@ bool AudioTable::AddAudio(Audio& audio, size_t tableIndex) {
     return true;
 }
 
+bool AudioTable::RemoveSubTable(size_t tableIndex) {
+    if (tableIndex >= size()) {
+        std::cout << "Attempted removal of invalid index of AudioTable (" << tableIndex << ")" << std::endl;
+        return false;
+    }
+    data.erase(data.begin() + tableIndex);
+    return true;
+}
 
 bool AudioTable::RemoveAudio(size_t tableIndex, size_t index) {
     if (tableIndex >= size()) {

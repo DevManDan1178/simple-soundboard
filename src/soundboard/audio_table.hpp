@@ -31,6 +31,12 @@ public:
     int CreateSubTable();
 
     /**
+     * @brief removes the subtable from the table
+     * @return if it was successful or not
+     */
+    bool RemoveSubTable(size_t tableIndex);
+
+    /**
      * @brief removes the audio at the corresponding position
      * @param tableIndex index of the table [from 0]
      * @param index index in the table [from 0]
