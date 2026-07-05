@@ -55,11 +55,7 @@ int WheelUI::RenderSelectionWheel(
     ImGuiIO& io = ImGui::GetIO();
     ImDrawList* draw = ImGui::GetWindowDrawList();
     size_t count = elements.size();
-
-    if (count == 0) {
-        return -1;
-    }
-
+    
     float innerRadius = radius * EMOTE_WHEEL_INNER_RADIUS_RATIO;
     float outerRadius = radius;
     float angleStep = (TAU) / count;
