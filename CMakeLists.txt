@@ -23,7 +23,7 @@ add_subdirectory(external/nativefiledialog-extended)
 add_subdirectory(external/json)
 add_subdirectory(external/libuiohook)
 # ---- Your executable ----
-add_executable(Soundboard
+add_executable(Soundboard WIN32
     # Core
     src/core/main.cpp
     src/core/app.cpp
@@ -58,6 +58,10 @@ add_executable(Soundboard
 )
 
 target_compile_definitions(Soundboard PRIVATE SDL_MAIN_HANDLED)
+
+if(MSVC)
+    set_target_properties(Soundboard PROPERTIES LINK_FLAGS "/ENTRY:mainCRTStartup")
+endif()
 
 # ---- Link libraries ----
 target_link_libraries(Soundboard PRIVATE
