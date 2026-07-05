@@ -1,4 +1,4 @@
-# Crappy Soundboard
+# Simple Soundboard
 
 This is a small soundboard application that lets you play (and stop) audio files with an emote wheel style UI.
 
