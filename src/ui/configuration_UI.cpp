@@ -14,6 +14,7 @@ constexpr float VOLUME_SLIDER_WIDTH = 200.0f;
 constexpr float MASTER_VOLUME_SLIDER_WIDTH = 300.0f;
 constexpr float WHEEL_DISPLAY_PADDING_TOP = 5.0f;
 constexpr float AUDIO_DISPLAY_PADDING_X = 20.0f;
+constexpr float REMOVE_WHEEL_PADDING_TOP = 5.0f;
 
 constexpr float ADD_AUDIO_PADDING_TOP = 10.0f; //Only if there are audio displays above
 constexpr float ADD_WHEEL_PADDING_TOP = 15.0f; //Only if there are wheel displays above
@@ -178,10 +179,8 @@ void ConfigurationUI::RenderAudioConfigurations(Soundboard& soundboard,  bool& u
             }
         }
 
-        if (audioCount > 0) {
-            ImGui::Dummy(ImVec2(0, ADD_AUDIO_PADDING_TOP));
-        }
-
+        
+        ImGui::Dummy(ImVec2(0, ADD_AUDIO_PADDING_TOP));
         if (audioCount < AudioTable::MAX_SUBTABLE_SIZE) {
             
             if (ImGui::Button(std::format("Add a sound##{0}", tableIdx).c_str())) {            
@@ -195,6 +194,15 @@ void ConfigurationUI::RenderAudioConfigurations(Soundboard& soundboard,  bool& u
             }
         } else {
             ImGui::Text("Maximum Reached");
+        }
+
+        ImGui::Dummy(ImVec2(0, REMOVE_WHEEL_PADDING_TOP));
+        if (ImGui::Button(std::format("Remove Wheel##{0}", tableIdx).c_str())) {
+            bool success = audioTable.RemoveSubTable(tableIdx);
+            if (success) {
+                unsavedChanges = true;
+                return; // table has been changed, stop for this frame
+            }
         }
 
         ImGui::Unindent(INDENT);
