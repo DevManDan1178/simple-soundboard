@@ -12,6 +12,7 @@ This is a small soundboard application that lets you play (and stop) audio files
 
 Audio files are binded to wheels, which are then operated like an emote wheel to select and play the audio.
 
+- *Wheels can be added or deleted (for which all audios of that wheel are also removed).*
 - *Maximum of 6 audios per wheel.*
 
 - *Audios are picked through a file dialog, so you can pick any audio (mp3, wav...) from the file explorer.*
