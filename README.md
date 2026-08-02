@@ -1,6 +1,6 @@
 # Simple Soundboard
 
-This is a small soundboard application that lets you play (and stop) audio files with an emote wheel style UI.
+This is a small soundboard application that lets you play (and stop) audio files into an audio driver with an emote wheel style UI using only 2 configurable hotkeys.
 
 
 ## 2 (+2) Hotkeys Only
