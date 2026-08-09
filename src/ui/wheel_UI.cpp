@@ -193,13 +193,13 @@ int WheelUI::RenderSelectionWheel(
         CIRCLE_SEGMENTS
     );
 
-
-    ImVec2 size = ImGui::CalcTextSize(std::to_string(wheelIndex).c_str());
+    int wheelNumber = wheelIndex + 1;
+    ImVec2 size = ImGui::CalcTextSize(std::to_string(wheelNumber).c_str());
 
     draw->AddText(
         ImVec2(center.x - size.x * HALF, center.y - size.y * HALF),
         TEXT_COLOR,
-        std::to_string(wheelIndex).c_str()
+        std::to_string(wheelNumber).c_str()
     );
 
     if (hovered != -1 && (GetAsyncKeyState(VK_LBUTTON) & 0x8000)) {
