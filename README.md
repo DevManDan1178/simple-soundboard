@@ -14,13 +14,13 @@ The application combines real-time audio playback, configurable audio devices, g
 1. Click on `Releases`
 2. Download the latest release (ZIP) and extract it
 3. Launch `SimpleSoundboard.exe`
-- If it is blocked by Windows Defender, you will have to allow it to run
+      - If it is blocked by Windows Defender, you will have to allow it to run
 4. Configure your preferred settings
-- Desired Hotkeys
-- Separate Output Audio Driver
-- Master Volume
-- Speaker Volume Modifier
-- Audio Drivers
+      - Desired Hotkeys
+      - Separate Output Audio Driver
+      - Master Volume
+      - Speaker Volume Modifier
+      - Audio Drivers
 5. Add a sound wheel
 6. Add audio files to the wheel (select already downloaded audio files from your PC)
 7. Play a sound!
@@ -105,13 +105,13 @@ You're all set! You can now select Voicemeeter's output (`CABLE Output`) driver 
 
 ## Usage
 1. Launch SimpleSoundboard.exe
-- Make sure VoiceMeeter or another audio driver mixer is open and working if planning to mix driver audios.
+      - Make sure VoiceMeeter or another audio driver mixer is open and working if planning to mix driver audios.
 2. Configure your preferred settings
-- Desired Hotkeys
-- Separate Output Audio Driver
-- Master Volume
-- Speaker Volume Modifier
-- Audio Drivers
+      - Desired Hotkeys
+      - Separate Output Audio Driver
+      - Master Volume
+      - Speaker Volume Modifier
+      - Audio Drivers
 3. Create one or more sound wheels.
 4. Add audio files to each wheel.
 5.  Play a sound!
