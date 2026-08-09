@@ -113,6 +113,7 @@ Your VoiceMeeter UI should look like this
 You're all set! You can now select Voicemeeter's output (`CABLE Output`) driver and use it for voice chat.
 
 ## Usage
+0. (Optional) Create a shortcut for the SimpleSoundboard.exe executable in the installed folder
 1. Launch SimpleSoundboard.exe
       - Make sure VoiceMeeter or another audio driver mixer is open and working if planning to mix audio drivers
 2. Configure your preferred settings
@@ -128,6 +129,8 @@ You're all set! You can now select Voicemeeter's output (`CABLE Output`) driver 
       2. Select a sound by hovering with mouse
       3. Let go of the hotkey to confirm your choice
 6. Use the `Stop All Sounds` hotkey to stop all currently playing sounds
+
+*Do not modify any files in the application's folder.*
 
 ## Screenshots
 ### Example Configuration UI
