@@ -124,7 +124,7 @@ You're all set! You can now select Voicemeeter's output (`CABLE Output`) driver 
 ### Example Configuration UI
 <img width="610" height="640" alt="image" src="https://github.com/user-attachments/assets/947afa3d-52c6-454b-a0a8-ff13eab04dfa" />
 
-### Example Wheel
+### Example Wheel Overlay
 
 <img width="560" height="510" alt="image" src="https://github.com/user-attachments/assets/5051c496-4703-4e46-9143-ac1fec65c969" />
 
