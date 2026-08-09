@@ -30,26 +30,26 @@ An external audio mixer such as VoiceMeeter is only required if soundboard audio
       - Audio Drivers
 4. Add a sound wheel
 5. Add audio files to the wheel (select already downloaded audio files from your PC)
-6. Play a sound!
-      1. Open the wheel by clicking and holding the hotkey.
-      2. Select a sound by hovering with mouse,
-      3. Let go of the hotkey to confirm your choice.
+6. Play a sound
+      1. Open the wheel by clicking and holding the hotkey
+      2. Select a sound by hovering with mouse
+      3. Let go of the hotkey to confirm your choice
 
 ## Features
-* Emote-wheel-style audio selection UI.
-* Support for multiple configurable sound wheels.
-* Up to 6 audio files per wheel.
-* Play and stop multiple sounds simultaneously.
-* Global hotkeys for opening the wheel and stopping playback.
-* Scroll wheel support for switching between sound wheels.
-* Per-audio volume and sound effect configuration.
-* Master volume control.
-* Independent local playback volume.
-* Configurable audio output device.
-* Native file dialog for selecting audio files.
-* Persistent configuration.
-* Semi-transparent fullscreen overlay.
-* Support for common audio formats supported by the audio backend.
+* Emote-wheel-style audio selection UI
+* Support for multiple configurable sound wheels
+* Up to 6 audio files per wheel
+* Play and stop multiple sounds simultaneously
+* Global hotkeys for opening the wheel and stopping playback
+* Scroll wheel support for switching between sound wheels
+* Per-audio volume and sound effect configuration
+* Master volume control
+* Independent local playback volume
+* Configurable audio output device
+* Native file dialog for selecting audio files
+* Persistent configuration
+* Semi-transparent fullscreen overlay
+* Support for common audio formats supported by the audio backend
 
 ### Playing Audio From a Wheel
 Audio clips to play are selected from an emote-wheel-style UI. 
@@ -114,20 +114,20 @@ You're all set! You can now select Voicemeeter's output (`CABLE Output`) driver 
 
 ## Usage
 1. Launch SimpleSoundboard.exe
-      - Make sure VoiceMeeter or another audio driver mixer is open and working if planning to mix audio drivers.
+      - Make sure VoiceMeeter or another audio driver mixer is open and working if planning to mix audio drivers
 2. Configure your preferred settings
       - Desired Hotkeys
       - Separate Output Audio Driver
       - Master Volume
       - Speaker Volume Modifier
       - Audio Drivers
-3. Create one or more sound wheels.
-4. Add audio files to each wheel.
-5.  Play a sound!
-      1. Open the wheel by clicking and holding the hotkey.
-      2. Select a sound by hovering with mouse,
-      3. Let go of the hotkey to confirm your choice.
-6. Use the `Stop All Sounds` hotkey to stop all currently playing sounds.
+3. Create one or more sound wheels
+4. Add audio files to each wheel
+5.  Play a sound
+      1. Open the wheel by clicking and holding the hotkey
+      2. Select a sound by hovering with mouse
+      3. Let go of the hotkey to confirm your choice
+6. Use the `Stop All Sounds` hotkey to stop all currently playing sounds
 
 ## Screenshots
 ### Example Configuration UI
@@ -193,14 +193,14 @@ Audio playback is handled using the `miniaudio` library.
 The audio system supports separate playback paths for local and routed audio.
 
 The audio manager is responsible for:
-- Initializing audio playback.
-- Loading audio files.
-- Managing playback of sounds.
-- Applying volume settings.
-- Applying audio effects.
-- Managing the selected output device.
-- Reinitializing routed playback when the output device changes.
-- Stopping active playback.
+- Initializing audio playback
+- Loading audio files
+- Managing playback of sounds
+- Applying volume settings
+- Applying audio effects
+- Managing the selected output device
+- Reinitializing routed playback when the output device changes
+- Stopping active playback
 
 This allows the application to continue using the configured soundboard while keeping local playback behavior separate from routed playback.
 
