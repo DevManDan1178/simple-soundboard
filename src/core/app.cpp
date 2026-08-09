@@ -289,7 +289,9 @@ void App::HandleEvent(const Event& event) {
         if (wheelVisible == toggleWheelEvent.visible) {
             return;
         }
-        
+        if (wheelIndex >= soundboard.AudioTableSize()) {
+            wheelIndex = soundboard.AudioTableSize() - 1;
+        }
         ToggleWheelVisible(toggleWheelEvent.visible);
         if (!wheelVisible) {
             soundboard.PlayAudio(wheelIndex, wheelSelectedIndex);
