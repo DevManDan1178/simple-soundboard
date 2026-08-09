@@ -1,5 +1,5 @@
 # Simple Soundboard
-Simple Soundboard is a lightweight Windows soundboard application built for Windows that allows audio files to be played through a configurable audio output device using an emote-wheel-style UI and global hotkeys.
+Simple Soundboard is a lightweight Windows soundboard application that allows audio files to be played through a configurable audio output device using an emote-wheel-style UI and global hotkeys.
 
 The application combines real-time audio playback, configurable audio devices, global input handling, a transparent fullscreen overlay, persistent configuration, and a custom wheel-based UI into a small native desktop application.
 
