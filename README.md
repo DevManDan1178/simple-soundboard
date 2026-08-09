@@ -152,7 +152,12 @@ You're all set! You can now select Voicemeeter's output (`CABLE Output`) driver 
     - Recommended: <a href="https://vb-audio.com/Voicemeeter/">VoiceMeeter</a>.
   
 *To trackpad users: get a mouse pls*
+ 
+<br/>
 
+---
+
+<br/>
 
 # Technical Overview
 ## How It Works
