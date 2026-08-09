@@ -11,19 +11,18 @@ The application combines real-time audio playback, configurable audio devices, g
 * **Stop Hotkey** — Stops all currently playing sounds.
 
 ## Quick start
-1. Click on `Releases`
-2. Download the latest release (ZIP) and extract it
-3. Launch `SimpleSoundboard.exe`
+1. Download a [release](https://github.com/DevManDan1178/simple-soundboard/releases) (ZIP) and extract it
+2. Launch `SimpleSoundboard.exe`
       - If it is blocked by Windows Defender, you will have to allow it to run
-4. Configure your preferred settings
+3. Configure your preferred settings
       - Desired Hotkeys
       - Separate Output Audio Driver
       - Master Volume
       - Speaker Volume Modifier
       - Audio Drivers
-5. Add a sound wheel
-6. Add audio files to the wheel (select already downloaded audio files from your PC)
-7. Play a sound!
+4. Add a sound wheel
+5. Add audio files to the wheel (select already downloaded audio files from your PC)
+6. Play a sound!
       1. Open the wheel by clicking and holding the hotkey.
       2. Select a sound by hovering with mouse,
       3. Let go of the hotkey to confirm your choice.
