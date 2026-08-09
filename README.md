@@ -10,6 +10,14 @@ The application combines concurrent audio playback, configurable audio devices, 
 * **Wheel Hotkey** — Opens and closes the sound selection wheel.
 * **Stop Hotkey** — Stops all currently playing sounds.
 
+## Requirements
+- Windows
+- A mouse (preferred over trackpad)
+
+An external audio mixer such as VoiceMeeter is only required if soundboard audio needs to be mixed with microphone audio. 
+
+[See Using With Voicemeeter](#using-with-voicemeeter)
+
 ## Quick start
 1. Download a [release](https://github.com/DevManDan1178/simple-soundboard/releases) (ZIP) and extract it
 2. Launch `SimpleSoundboard.exe`
@@ -46,13 +54,13 @@ The application combines concurrent audio playback, configurable audio devices, 
 ### Playing Audio From a Wheel
 Audio clips to play are selected from an emote-wheel-style UI. 
 
-The would-be selected audio in the wheel is determined by the position of the mouse on the user's screen and will be highlighted.
+The currently selected audio in the wheel is determined by the position of the mouse on the user's screen and will be highlighted.
 
 In order to close the wheel without playing a sound, the user simply has to keep their mouse in the middle of the wheel, avoiding the selection of an audio to play.
 
 *The wheel is rendered as a semi-transparent fullscreen overlay, allowing the wheel to be displayed over the current application without requiring the user to switch windows.*
 ### Managing Wheels
-Audio files are binded to wheels, which are then operated like an emote wheel to select and play the audio.
+Audio files are bound to wheels, which are then operated like an emote wheel to select and play the audio.
 
 - Wheels can be added or deleted (for which all configured audio clips of that wheel are also removed) in the configuration UI.
 - Maximum of 6 audio clips per wheel.
@@ -77,6 +85,8 @@ The selected device can be changed through the configuration UI.
 The application maintains separate playback paths for routed and local audio, allowing soundboard audio to be sent to an output device while also providing local playback.
 
 ### Audio Playback Alongside a Microphone Device
+> **Optional:** This section is only necessary if you want to combine soundboard audio with microphone audio for voice chat.
+
 The soundboard cannot directly write audio into an existing microphone input driver.
 
 If the goal is to combine soundboard audio with microphone audio and then send both to another application, an external audio mixer or virtual audio device is required.
@@ -134,7 +144,7 @@ You're all set! You can now select Voicemeeter's output (`CABLE Output`) driver 
 
 
 ## Limitations
-- The use of a third party app to combine audio from a microphone driver and a seperate driver is required.
+- The use of a third party app to combine audio from a microphone driver and a separate driver is required.
     - The soundboard cannot play sound into existing microphone audio drivers, as they are read-only.
     - Recommended: <a href="https://vb-audio.com/Voicemeeter/">VoiceMeeter</a>.
   
@@ -182,7 +192,7 @@ Audio playback is handled using the `miniaudio` library.
 
 The audio system supports separate playback paths for local and routed audio.
 
-The audio manager is responsible for
+The audio manager is responsible for:
 - Initializing audio playback.
 - Loading audio files.
 - Managing playback of sounds.
@@ -218,7 +228,7 @@ The overlay is designed to remain visually lightweight so that the application u
 ### Configuration
 Configuration is persisted using JSON.
 
-The configuration system stores the application states below, allowing it to restore the user's soundboard configuration after restarting.
+The configuration system stores the following application states, allowing it to restore the user's soundboard configuration after restarting.
 - Sound wheels
 - Audio file paths
 - Audio settings
@@ -227,6 +237,7 @@ The configuration system stores the application states below, allowing it to res
 - Hotkeys
 
 ## Tech Stack
+The project is built as a native Windows desktop application using C++20 and CMake.
 
 * **Language:** C++20
 * **Build System:** CMake
@@ -238,8 +249,6 @@ The configuration system stores the application states below, allowing it to res
 * **File Dialog:** nativefiledialog-extended
 * **Configuration:** nlohmann/json
 * **Package Management:** vcpkg
-
-The project is built as a native Windows desktop application using C++20 and CMake.
 
 ## Architecture
 The source code is separated into components based on responsibility    
@@ -266,6 +275,25 @@ src/
 └── ui/
     └── Configuration and wheel interfaces
 ```
+
+## Building From Source
+
+### Requirements
+* C++20-compatible compiler
+* CMake 3.15+
+* vcpkg
+* Windows development environment
+
+The project uses vcpkg for SDL2 and OpenGL dependencies. Other third-party dependencies are included as Git submodules.
+
+### Dependencies
+* SDL2
+* OpenGL
+* Dear ImGui
+* miniaudio
+* libuiohook
+* nativefiledialog-extended
+* nlohmann/json
 
 ## Engineering Challenges
 ### Routing Audio to a Selected Device
@@ -339,5 +367,3 @@ The amount of audio clips in a wheel was also capped to avoid cases where narrow
 Input actions and other application changes are communicated through the application's event system rather than requiring every component to directly control every other component.
 
 This reduces coupling between the UI, input, and soundboard systems.
-
-
