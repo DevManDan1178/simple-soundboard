@@ -1,7 +1,7 @@
 # Simple Soundboard
 Simple Soundboard is a lightweight Windows soundboard application that allows audio files to be played through a configurable audio output device using an emote-wheel-style UI and global hotkeys.
 
-The application combines real-time audio playback, configurable audio devices, global input handling, a transparent fullscreen overlay, persistent configuration, and a custom wheel-based UI into a small native desktop application.
+The application combines concurrent audio playback, configurable audio devices, global input handling, a transparent fullscreen overlay, persistent configuration, and a custom wheel-based UI into a small native desktop application.
 
 [See example screenshots](#screenshots)
 
@@ -133,7 +133,12 @@ You're all set! You can now select Voicemeeter's output (`CABLE Output`) driver 
 <img width="268" height="244" alt="image" src="https://github.com/user-attachments/assets/48d9b1ea-dd17-4c8c-9399-19bf2413c832" />
 
 
-<br><br>
+## Limitations
+- The use of a third party app to combine audio from a microphone driver and a seperate driver is required.
+    - The soundboard cannot play sound into existing microphone audio drivers, as they are read-only.
+    - Recommended: <a href="https://vb-audio.com/Voicemeeter/">VoiceMeeter</a>.
+  
+*To trackpad users: get a mouse pls*
 
 
 # Technical Overview
@@ -262,13 +267,6 @@ src/
     └── Configuration and wheel interfaces
 ```
 
-## Limitations
-- The use of a third party app to combine audio from a microphone driver and a seperate driver is required.
-    - The soundboard cannot play sound into existing microphone audio drivers, as they are read-only.
-    - Recommended: <a href="https://vb-audio.com/Voicemeeter/">VoiceMeeter</a>.
-  
-*To trackpad users: get a mouse pls*
-
 ## Engineering Challenges
 ### Routing Audio to a Selected Device
 
@@ -308,7 +306,6 @@ The UI is therefore implemented as a transparent fullscreen overlay that can be 
 The overlay also needs to remain lightweight enough that the application underneath remains visible while selecting a sound.
 
 ### Persisting User Configuration
-
 Users should not need to configure their soundboard every time the application starts.
 
 The configuration system persists the user's sound wheels, audio files, audio settings, volume settings, selected output device, and hotkeys.
@@ -331,12 +328,10 @@ This allows, for example, a global hotkey event to be handled without the input 
 ### Separated Local and Routed Audio Engines
 Local and routed playback are kept separate rather than treating them as a single output.
 
-This allows the local audio to have its own volume control while the routed audio can still be sent unchanged to the configured output device.
+This allows local playback to have its own volume modifier while maintaining a separate routed playback path for the configured output device.
 
 ### Wheel-Based Selection
-In order to avoid the user requiring to memorize every audio to their configured hotkey, I decided on making it a popup UI overlay on hotkey press to minimize the amount of required configurable hotkeys.
-
-A wheel interface was chosen instead of a traditional list or grid because it is very accessible and intuitive for most users.
+To avoid requiring users to memorize a separate hotkey for every sound, a wheel interface was chosen instead of a traditional list or grid because it is very accessible and intuitive to use.
 
 The amount of audio clips in a wheel was also capped to avoid cases where narrow slices can cause the user to select the wrong audio.
 
