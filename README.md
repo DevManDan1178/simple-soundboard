@@ -15,10 +15,10 @@ The application combines real-time audio playback, configurable audio devices, g
 2. Launch `SimpleSoundboard.exe`
       - If it is blocked by Windows Defender, you will have to allow it to run
 3. Configure your preferred settings
-      - Desired Hotkeys
-      - Separate Output Audio Driver
+      - Hotkeys to open the wheel and stop sounds
+      - Output device
       - Master Volume
-      - Speaker Volume Modifier
+      - Local Playback Volume
       - Audio Drivers
 4. Add a sound wheel
 5. Add audio files to the wheel (select already downloaded audio files from your PC)
@@ -44,7 +44,7 @@ The application combines real-time audio playback, configurable audio devices, g
 * Support for common audio formats supported by the audio backend.
 
 ### Playing Audio From a Wheel
-Audios to play are selected from an emote-wheel-style UI. 
+Audio clips to play are selected from an emote-wheel-style UI. 
 
 The would-be selected audio in the wheel is determined by the position of the mouse on the user's screen and will be highlighted.
 
@@ -54,9 +54,9 @@ In order to close the wheel without playing a sound, the user simply has to keep
 ### Managing Wheels
 Audio files are binded to wheels, which are then operated like an emote wheel to select and play the audio.
 
-- Wheels can be added or deleted (for which all audios of that wheel are also removed) in the configuration UI.
-- Maximum of 6 audios per wheel.
-- Audios can be picked from any path in your PC.
+- Wheels can be added or deleted (for which all configured audio clips of that wheel are also removed) in the configuration UI.
+- Maximum of 6 audio clips per wheel.
+- Audio clips can be picked from any path in your PC.
 
 An audio driver can be picked for which the soundboard application will replay the audio in.
 
@@ -104,7 +104,7 @@ You're all set! You can now select Voicemeeter's output (`CABLE Output`) driver 
 
 ## Usage
 1. Launch SimpleSoundboard.exe
-      - Make sure VoiceMeeter or another audio driver mixer is open and working if planning to mix driver audios.
+      - Make sure VoiceMeeter or another audio driver mixer is open and working if planning to mix audio drivers.
 2. Configure your preferred settings
       - Desired Hotkeys
       - Separate Output Audio Driver
@@ -338,7 +338,7 @@ In order to avoid the user requiring to memorize every audio to their configured
 
 A wheel interface was chosen instead of a traditional list or grid because it is very accessible and intuitive for most users.
 
-The amount of audios in a wheel was also capped to avoid cases where narrow slices can cause the user to select the wrong audio.
+The amount of audio clips in a wheel was also capped to avoid cases where narrow slices can cause the user to select the wrong audio.
 
 ### Event-Based Application Structure
 Input actions and other application changes are communicated through the application's event system rather than requiring every component to directly control every other component.
